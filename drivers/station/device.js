@@ -3,7 +3,7 @@
 const Homey = require('homey');
 const { parseZoneName } = require('../../lib/zoneName');
 
-module.exports = class StationDevice extends Homey.Device {
+class StationDevice extends Homey.Device {
 
   async onInit() {
     this.sid = this.getStoreValue('sid');
@@ -68,20 +68,44 @@ module.exports = class StationDevice extends Homey.Device {
     if (!this.getAvailable()) await this.setAvailable();
     const parsed = parseZoneName(z.name, this.sid);
     const typeLabel = this.getSetting('sprinkler_type') === 'spray' ? 'Spreder' : 'Drypp';
-    let status = parsed.valve ? `Av · ${typeLabel} ${parsed.valve}` : `Av · ${typeLabel}`;
-    if (z.disabled) status = 'Deaktivert';
-    else if (z.running) status = z.program ? `Vanner (${z.program})` : 'Vanner';
-    else if (z.waiting) status = 'Venter';
-    const remaining = Math.round((z.remaining / 60) * 10) / 10;
+    this._idleStatus = parsed.valve ? `Av · ${typeLabel} ${parsed.valve}` : `Av · ${typeLabel}`;
+    if (z.disabled) this._idleStatus = 'Deaktivert';
+    else if (z.waiting) this._idleStatus = 'Venter';
+    this._program = z.program;
+    // Remember when the run ends so the countdown can tick between polls.
+    this._endsAt = z.running ? Date.now() + z.remaining * 1000 : null;
     const set = (cap, val) => (this.getCapabilityValue(cap) !== val ? this.setCapabilityValue(cap, val) : null);
     const wasRunning = this.getCapabilityValue('onoff') === true;
-    await Promise.all([set('onoff', z.running), set('os_status', status), set('os_remaining', remaining)]);
+    await set('onoff', z.running);
+    await this._tick();
+    this.homey.clearInterval(this._ticker);
+    if (z.running) this._ticker = this.homey.setInterval(() => this._tick().catch(this.error), 5000);
     if (z.running && !wasRunning) {
       // New run: restart the per-run consumption counter.
       await this.setStoreValue('water_last_run', 0);
       await this.setCapabilityValue('os_last_run', 0).catch(this.error);
     }
     if (z.running !== wasRunning && this.homey.app.water) this.homey.app.water.update();
+  }
+
+  static formatLeft(sec) {
+    if (sec >= 3600) return `${Math.floor(sec / 3600)} t ${Math.floor((sec % 3600) / 60)} min`;
+    if (sec >= 60) return `${Math.ceil(sec / 60)} min`;
+    return `${Math.max(0, Math.round(sec))} s`;
+  }
+
+  /** Updates the status text and remaining time from the last known end time. */
+  async _tick() {
+    const left = this._endsAt ? Math.max(0, (this._endsAt - Date.now()) / 1000) : 0;
+    let status = this._idleStatus || '';
+    if (this._endsAt) {
+      status = `Vanner · ${StationDevice.formatLeft(left)} igjen`;
+      if (this._program && this._program !== 'Manual') status += ` (${this._program})`;
+    }
+    const remaining = Math.round((left / 60) * 10) / 10;
+    if (this.getCapabilityValue('os_status') !== status) await this.setCapabilityValue('os_status', status);
+    if (this.getCapabilityValue('os_remaining') !== remaining) await this.setCapabilityValue('os_remaining', remaining);
+    if (this._endsAt && left <= 0) this.homey.clearInterval(this._ticker);
   }
 
   async run(seconds) {
@@ -101,10 +125,13 @@ module.exports = class StationDevice extends Homey.Device {
 
   _detach() {
     this.homey.clearTimeout(this._retry);
+    this.homey.clearInterval(this._ticker);
     if (this.controller) {
       this.controller.off('state', this._onState);
       this.controller.off('unavailable', this._onUnavailable);
     }
   }
 
-};
+}
+
+module.exports = StationDevice;
