@@ -1,5 +1,35 @@
 {
-  "pair": { "title": "Koble til OpenSprinkler", "host": "Vertsnavn eller IP-adresse", "password": "Enhetspassord", "connect": "Koble til",
-    "no_host": "Skriv inn vertsnavn eller IP-adresse", "no_controller": "Legg til en OpenSprinkler-kontroller først" },
-  "device": { "controller_missing": "Fant ikke OpenSprinkler-kontrolleren" }
+  "pair": {
+    "title": "Koble til OpenSprinkler",
+    "host": "Vertsnavn eller IP-adresse",
+    "password": "Enhetspassord",
+    "connect": "Koble til",
+    "no_host": "Skriv inn vertsnavn eller IP-adresse",
+    "no_controller": "Legg til en OpenSprinkler-kontroller først"
+  },
+  "device": {
+    "controller_missing": "Fant ikke OpenSprinkler-kontrolleren"
+  },
+  "settings": {
+    "title": "OpenSprinkler – vannmåling",
+    "intro": "Velg en vannmåler (f.eks. Sonoff Zigbee-vannmåler). Vannflyt og forbruk tilordnes sonen som går. Går flere soner samtidig, deles vannet likt.",
+    "meter": "Vannmåler",
+    "device": "Målerenhet",
+    "flow": "Vannflyt-verdi (L/min)",
+    "volume": "Akkumulert volum-verdi",
+    "unit": "Enhet for akkumulert volum",
+    "grace": "Etterløpstid etter at sone stopper (sekunder)",
+    "save": "Lagre",
+    "zones": "Forbruk per sone",
+    "reset": "Nullstill alt forbruk",
+    "reset_confirm": "Nullstille vannforbruk for alle soner?",
+    "none": "– Ingen –",
+    "integrate": "– Ingen (beregn fra vannflyt) –",
+    "not_configured": "Ingen vannmåler valgt.",
+    "zone": "Sone",
+    "last_run": "Siste kjøring",
+    "total": "Totalt",
+    "unassigned": "Ikke tilordnet noen sone",
+    "saved": "Lagret"
+  }
 }

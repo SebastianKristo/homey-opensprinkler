@@ -1,5 +1,35 @@
 {
-  "pair": { "title": "Connect to OpenSprinkler", "host": "Host or IP address", "password": "Device password", "connect": "Connect",
-    "no_host": "Please enter a host or IP address", "no_controller": "Add an OpenSprinkler controller first" },
-  "device": { "controller_missing": "OpenSprinkler controller not found" }
+  "pair": {
+    "title": "Connect to OpenSprinkler",
+    "host": "Host or IP address",
+    "password": "Device password",
+    "connect": "Connect",
+    "no_host": "Please enter a host or IP address",
+    "no_controller": "Add an OpenSprinkler controller first"
+  },
+  "device": {
+    "controller_missing": "OpenSprinkler controller not found"
+  },
+  "settings": {
+    "title": "OpenSprinkler – water metering",
+    "intro": "Select a water meter (e.g. a Sonoff Zigbee water meter). Flow and consumption are attributed to the zone that is running. If several zones run at once, the water is split evenly.",
+    "meter": "Water meter",
+    "device": "Meter device",
+    "flow": "Flow capability (L/min)",
+    "volume": "Cumulative volume capability",
+    "unit": "Unit of cumulative volume",
+    "grace": "Grace period after a zone stops (seconds)",
+    "save": "Save",
+    "zones": "Consumption per zone",
+    "reset": "Reset all consumption",
+    "reset_confirm": "Reset water consumption for all zones?",
+    "none": "– None –",
+    "integrate": "– None (calculate from flow) –",
+    "not_configured": "No water meter selected.",
+    "zone": "Zone",
+    "last_run": "Last run",
+    "total": "Total",
+    "unassigned": "Not attributed to any zone",
+    "saved": "Saved"
+  }
 }

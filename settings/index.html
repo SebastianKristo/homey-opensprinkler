@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    td, th { padding: 6px 4px; text-align: left; border-bottom: 1px solid #eee; }
+    td.n, th.n { text-align: right; }
+    .run { color: #1e88e5; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <header class="homey-header">
+    <h1 class="homey-title" data-i18n="settings.title"></h1>
+    <p class="homey-subtitle" data-i18n="settings.intro"></p>
+  </header>
+
+  <fieldset class="homey-form-fieldset">
+    <legend class="homey-form-legend" data-i18n="settings.meter"></legend>
+    <div class="homey-form-group">
+      <label class="homey-form-label" for="device" data-i18n="settings.device"></label>
+      <select class="homey-form-select" id="device"></select>
+    </div>
+    <div class="homey-form-group">
+      <label class="homey-form-label" for="flow" data-i18n="settings.flow"></label>
+      <select class="homey-form-select" id="flow"></select>
+    </div>
+    <div class="homey-form-group">
+      <label class="homey-form-label" for="meter" data-i18n="settings.volume"></label>
+      <select class="homey-form-select" id="meter"></select>
+    </div>
+    <div class="homey-form-group">
+      <label class="homey-form-label" for="unit" data-i18n="settings.unit"></label>
+      <select class="homey-form-select" id="unit">
+        <option value="m3">m³</option>
+        <option value="L">L</option>
+      </select>
+    </div>
+    <div class="homey-form-group">
+      <label class="homey-form-label" for="grace" data-i18n="settings.grace"></label>
+      <input class="homey-form-input" id="grace" type="number" min="0" max="600" />
+    </div>
+    <button class="homey-button-primary-full" id="save" data-i18n="settings.save"></button>
+  </fieldset>
+
+  <fieldset class="homey-form-fieldset">
+    <legend class="homey-form-legend" data-i18n="settings.zones"></legend>
+    <p id="live"></p>
+    <table id="zones"></table>
+    <p id="unassigned"></p>
+    <button class="homey-button-secondary-full" id="reset" data-i18n="settings.reset"></button>
+  </fieldset>
+
+  <script type="text/javascript">
+  function onHomeyReady(Homey) {
+    const $ = id => document.getElementById(id);
+    const t = k => Homey.__(`settings.${k}`);
+    let meters = [];
+
+    const opt = (sel, value, text) => { const o = document.createElement('option'); o.value = value; o.textContent = text; sel.appendChild(o); };
+
+    function fillCaps(cfg) {
+      const dev = meters.find(m => m.id === $('device').value);
+      for (const id of ['flow', 'meter']) {
+        const sel = $(id); sel.innerHTML = '';
+        opt(sel, '', id === 'meter' ? t('integrate') : t('none'));
+        (dev ? dev.capabilities : []).forEach(c => opt(sel, c.id, `${c.title} (${c.id}${c.units ? `, ${c.units}` : ''}) = ${c.value == null ? '–' : c.value}`));
+      }
+      const has = id => dev && dev.capabilities.some(c => c.id === id);
+      $('flow').value = cfg && has(cfg.flowCapability) ? cfg.flowCapability : (has('measure_water') ? 'measure_water' : '');
+      $('meter').value = cfg && cfg.meterCapability !== undefined && (cfg.meterCapability === '' || has(cfg.meterCapability))
+        ? cfg.meterCapability : (has('meter_water') ? 'meter_water' : '');
+    }
+
+    async function loadStatus() {
+      try {
+        const s = await Homey.api('GET', '/status');
+        $('live').textContent = s.meterName ? `${s.meterName}: ${s.flow} L/min` : t('not_configured');
+        const tbl = $('zones'); tbl.innerHTML = `<tr><th>${t('zone')}</th><th class="n">L/min</th><th class="n">${t('last_run')}</th><th class="n">${t('total')}</th></tr>`;
+        s.zones.forEach(z => {
+          const tr = document.createElement('tr');
+          [z.name, (z.flow || 0).toFixed(1), `${Math.round(z.lastRun)} L`, `${Math.round(z.total)} L`].forEach((v, i) => {
+            const td = document.createElement('td'); td.textContent = v; if (i) td.className = 'n'; if (!i && z.running) td.className = 'run'; tr.appendChild(td);
+          });
+          tbl.appendChild(tr);
+        });
+        $('unassigned').textContent = `${t('unassigned')}: ${Math.round(s.unassigned)} L`;
+        return s;
+      } catch (err) { $('live').textContent = err.message || err; return null; }
+    }
+
+    async function init() {
+      const status = await loadStatus();
+      const cfg = status ? status.config : {};
+      try { meters = await Homey.api('GET', '/meters'); } catch (err) { Homey.alert(err.message || err); }
+      opt($('device'), '', t('none'));
+      meters.forEach(m => opt($('device'), m.id, m.name));
+      $('device').value = cfg.deviceId || '';
+      fillCaps(cfg);
+      $('unit').value = cfg.meterUnit || 'm3';
+      $('grace').value = cfg.graceSeconds != null ? cfg.graceSeconds : 60;
+      $('device').onchange = () => fillCaps(null);
+      Homey.ready();
+    }
+
+    $('save').onclick = () => {
+      Homey.set('water', {
+        deviceId: $('device').value || null,
+        flowCapability: $('flow').value,
+        meterCapability: $('meter').value,
+        meterUnit: $('unit').value,
+        graceSeconds: Number($('grace').value) || 0,
+      }, err => {
+        if (err) return Homey.alert(err.message || err);
+        Homey.alert(t('saved'));
+        setTimeout(loadStatus, 1500);
+      });
+    };
+    $('reset').onclick = () => Homey.confirm(t('reset_confirm'), 'warning', async (err, ok) => {
+      if (!ok) return;
+      await Homey.api('POST', '/reset');
+      loadStatus();
+    });
+
+    init();
+    setInterval(loadStatus, 5000);
+  }
+  </script>
+</body>
+</html>

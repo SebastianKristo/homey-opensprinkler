@@ -8,5 +8,8 @@
   },
   "devDependencies": {
     "homey": "^4.4.0"
+  },
+  "dependencies": {
+    "homey-api": "^3.21.0"
   }
 }

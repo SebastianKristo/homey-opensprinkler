@@ -1,0 +1,2 @@
+{ "type": "number", "title": { "en": "Last run consumption", "no": "Forbruk siste kjøring" }, "units": { "en": "L" }, "decimals": 0,
+  "getable": true, "setable": false, "uiComponent": "sensor", "icon": "/assets/water.svg", "insights": true }

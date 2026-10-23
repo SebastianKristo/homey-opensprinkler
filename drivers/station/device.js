@@ -14,7 +14,32 @@ module.exports = class StationDevice extends Homey.Device {
       else await this.stop();
     });
 
+    for (const cap of ['measure_water', 'meter_water', 'os_last_run']) {
+      if (!this.hasCapability(cap)) await this.addCapability(cap).catch(this.error);
+    }
+
     this._attach();
+  }
+
+  async setWaterFlow(lpm) {
+    const v = Math.round(lpm * 10) / 10;
+    if (this.getCapabilityValue('measure_water') !== v) await this.setCapabilityValue('measure_water', v);
+  }
+
+  async addWaterConsumption(litres) {
+    const total = (this.getStoreValue('water_total') || 0) + litres;
+    const last = (this.getStoreValue('water_last_run') || 0) + litres;
+    await this.setStoreValue('water_total', total);
+    await this.setStoreValue('water_last_run', last);
+    await this.setCapabilityValue('meter_water', Math.round(total) / 1000);
+    await this.setCapabilityValue('os_last_run', Math.round(last));
+  }
+
+  async resetWater() {
+    await this.setStoreValue('water_total', 0);
+    await this.setStoreValue('water_last_run', 0);
+    await this.setCapabilityValue('meter_water', 0);
+    await this.setCapabilityValue('os_last_run', 0);
   }
 
   _attach() {
@@ -46,7 +71,14 @@ module.exports = class StationDevice extends Homey.Device {
     else if (z.waiting) status = 'Waiting';
     const remaining = Math.round((z.remaining / 60) * 10) / 10;
     const set = (cap, val) => (this.getCapabilityValue(cap) !== val ? this.setCapabilityValue(cap, val) : null);
+    const wasRunning = this.getCapabilityValue('onoff') === true;
     await Promise.all([set('onoff', z.running), set('os_status', status), set('os_remaining', remaining)]);
+    if (z.running && !wasRunning) {
+      // New run: restart the per-run consumption counter.
+      await this.setStoreValue('water_last_run', 0);
+      await this.setCapabilityValue('os_last_run', 0).catch(this.error);
+    }
+    if (z.running !== wasRunning && this.homey.app.water) this.homey.app.water.update();
   }
 
   async run(seconds) {

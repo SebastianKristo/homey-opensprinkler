@@ -3,12 +3,45 @@
   "version": "1.0.0",
   "compatibility": ">=12.1.0",
   "sdk": 3,
-  "platforms": ["local"],
-  "name": { "en": "OpenSprinkler", "no": "OpenSprinkler" },
-  "description": { "en": "Control your OpenSprinkler irrigation controller", "no": "Styr OpenSprinkler vanningskontrolleren din" },
-  "category": ["appliances"],
-  "permissions": [],
+  "platforms": [
+    "local"
+  ],
+  "name": {
+    "en": "OpenSprinkler",
+    "no": "OpenSprinkler"
+  },
+  "description": {
+    "en": "Control your OpenSprinkler irrigation controller",
+    "no": "Styr OpenSprinkler vanningskontrolleren din"
+  },
+  "category": [
+    "appliances"
+  ],
+  "permissions": [
+    "homey:manager:api"
+  ],
   "brandColor": "#2E7D32",
-  "images": { "small": "/assets/images/small.png", "large": "/assets/images/large.png", "xlarge": "/assets/images/xlarge.png" },
-  "author": { "name": "Sebastian Kristoffersen", "email": "sebastian@kristo.no" }
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "Sebastian Kristoffersen",
+    "email": "sebastian@kristo.no"
+  },
+  "api": {
+    "getMeters": {
+      "method": "GET",
+      "path": "/meters"
+    },
+    "getStatus": {
+      "method": "GET",
+      "path": "/status"
+    },
+    "reset": {
+      "method": "POST",
+      "path": "/reset"
+    }
+  }
 }

@@ -18,7 +18,9 @@
   "category": [
     "appliances"
   ],
-  "permissions": [],
+  "permissions": [
+    "homey:manager:api"
+  ],
   "brandColor": "#2E7D32",
   "images": {
     "small": "/assets/images/small.png",
@@ -28,6 +30,20 @@
   "author": {
     "name": "Sebastian Kristoffersen",
     "email": "sebastian@kristo.no"
+  },
+  "api": {
+    "getMeters": {
+      "method": "GET",
+      "path": "/meters"
+    },
+    "getStatus": {
+      "method": "GET",
+      "path": "/status"
+    },
+    "reset": {
+      "method": "POST",
+      "path": "/reset"
+    }
   },
   "flow": {
     "conditions": [
@@ -61,6 +77,13 @@
       }
     ],
     "actions": [
+      {
+        "title": {
+          "en": "Reset water consumption for all zones",
+          "no": "Nullstill vannforbruk for alle soner"
+        },
+        "id": "reset_water"
+      },
       {
         "title": {
           "en": "Run program",
@@ -365,7 +388,10 @@
       "capabilities": [
         "onoff",
         "os_status",
-        "os_remaining"
+        "os_remaining",
+        "measure_water",
+        "meter_water",
+        "os_last_run"
       ],
       "capabilitiesOptions": {
         "onoff": {
@@ -373,6 +399,19 @@
             "en": "Watering",
             "no": "Vanner"
           }
+        },
+        "measure_water": {
+          "title": {
+            "en": "Water flow",
+            "no": "Vannflyt"
+          }
+        },
+        "meter_water": {
+          "title": {
+            "en": "Water consumption",
+            "no": "Vannforbruk"
+          },
+          "decimals": 3
         }
       },
       "platforms": [
@@ -516,6 +555,22 @@
     }
   },
   "capabilities": {
+    "os_last_run": {
+      "type": "number",
+      "title": {
+        "en": "Last run consumption",
+        "no": "Forbruk siste kjøring"
+      },
+      "units": {
+        "en": "L"
+      },
+      "decimals": 0,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/water.svg",
+      "insights": true
+    },
     "os_rain_delay": {
       "type": "boolean",
       "title": {

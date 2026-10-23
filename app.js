@@ -1,12 +1,16 @@
 'use strict';
 
 const Homey = require('homey');
+const WaterTracker = require('./lib/WaterTracker');
 
 module.exports = class OpenSprinklerApp extends Homey.App {
 
   async onInit() {
     this._registerFlow();
     this._registerWidgets();
+    this.water = new WaterTracker(this);
+    // Give devices a moment to initialise before attaching to the meter.
+    this.homey.setTimeout(() => this.water.start().catch(err => this.error('Water tracker:', err.message)), 5000);
     this.log('OpenSprinkler app started');
   }
 
@@ -61,6 +65,8 @@ module.exports = class OpenSprinklerApp extends Homey.App {
     cards.getActionCard('set_program_enabled')
       .registerRunListener(({ device, program, state }) => device.api.setProgramEnabled(program.id, state === 'on').then(() => device.refresh()))
       .registerArgumentAutocompleteListener('program', programAutocomplete);
+
+    cards.getActionCard('reset_water').registerRunListener(() => this.water.reset());
 
     cards.getConditionCard('station_running').registerRunListener(({ device }) => device.getCapabilityValue('onoff') === true);
     cards.getConditionCard('rain_delay_active').registerRunListener(({ device }) => device.getCapabilityValue('os_rain_delay') === true);
