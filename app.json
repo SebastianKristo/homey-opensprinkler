@@ -1,0 +1,607 @@
+{
+  "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
+  "id": "no.opensprinkler",
+  "version": "1.0.0",
+  "compatibility": ">=12.1.0",
+  "sdk": 3,
+  "platforms": [
+    "local"
+  ],
+  "name": {
+    "en": "OpenSprinkler",
+    "no": "OpenSprinkler"
+  },
+  "description": {
+    "en": "Control your OpenSprinkler irrigation controller",
+    "no": "Styr OpenSprinkler vanningskontrolleren din"
+  },
+  "category": [
+    "appliances"
+  ],
+  "permissions": [],
+  "brandColor": "#2E7D32",
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "Sebastian Kristoffersen",
+    "email": "sebastian@kristo.no"
+  },
+  "flow": {
+    "conditions": [
+      {
+        "title": {
+          "en": "Rain delay !{{is|is not}} active",
+          "no": "Regnforsinkelse !{{er|er ikke}} aktiv"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=controller"
+          }
+        ],
+        "id": "rain_delay_active"
+      },
+      {
+        "title": {
+          "en": "Zone !{{is|is not}} watering",
+          "no": "Sone !{{vanner|vanner ikke}}"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=station"
+          }
+        ],
+        "id": "station_running"
+      }
+    ],
+    "actions": [
+      {
+        "title": {
+          "en": "Run program",
+          "no": "Kjør program"
+        },
+        "titleFormatted": {
+          "en": "Run program [[program]] (weather adjust: [[use_weather]])",
+          "no": "Kjør program [[program]] (værjustering: [[use_weather]])"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=controller"
+          },
+          {
+            "type": "autocomplete",
+            "name": "program",
+            "title": {
+              "en": "Program",
+              "no": "Program"
+            }
+          },
+          {
+            "type": "dropdown",
+            "name": "use_weather",
+            "values": [
+              {
+                "id": "no",
+                "title": {
+                  "en": "No",
+                  "no": "Nei"
+                }
+              },
+              {
+                "id": "yes",
+                "title": {
+                  "en": "Yes",
+                  "no": "Ja"
+                }
+              }
+            ]
+          }
+        ],
+        "id": "run_program"
+      },
+      {
+        "title": {
+          "en": "Run zone",
+          "no": "Kjør sone"
+        },
+        "titleFormatted": {
+          "en": "Run zone for [[minutes]] minutes",
+          "no": "Kjør sone i [[minutes]] minutter"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=station"
+          },
+          {
+            "type": "number",
+            "name": "minutes",
+            "min": 1,
+            "max": 720,
+            "title": {
+              "en": "Minutes",
+              "no": "Minutter"
+            }
+          }
+        ],
+        "id": "run_station"
+      },
+      {
+        "title": {
+          "en": "Enable/disable program",
+          "no": "Aktiver/deaktiver program"
+        },
+        "titleFormatted": {
+          "en": "Turn program [[program]] [[state]]",
+          "no": "Slå program [[program]] [[state]]"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=controller"
+          },
+          {
+            "type": "autocomplete",
+            "name": "program",
+            "title": {
+              "en": "Program",
+              "no": "Program"
+            }
+          },
+          {
+            "type": "dropdown",
+            "name": "state",
+            "values": [
+              {
+                "id": "on",
+                "title": {
+                  "en": "on",
+                  "no": "på"
+                }
+              },
+              {
+                "id": "off",
+                "title": {
+                  "en": "off",
+                  "no": "av"
+                }
+              }
+            ]
+          }
+        ],
+        "id": "set_program_enabled"
+      },
+      {
+        "title": {
+          "en": "Set rain delay",
+          "no": "Sett regnforsinkelse"
+        },
+        "titleFormatted": {
+          "en": "Set rain delay to [[hours]] hours",
+          "no": "Sett regnforsinkelse til [[hours]] timer"
+        },
+        "hint": {
+          "en": "0 hours cancels the rain delay.",
+          "no": "0 timer avbryter regnforsinkelsen."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=controller"
+          },
+          {
+            "type": "number",
+            "name": "hours",
+            "min": 0,
+            "max": 32767,
+            "title": {
+              "en": "Hours",
+              "no": "Timer"
+            }
+          }
+        ],
+        "id": "set_rain_delay"
+      },
+      {
+        "title": {
+          "en": "Set water level",
+          "no": "Sett vannivå"
+        },
+        "titleFormatted": {
+          "en": "Set water level to [[level]]%",
+          "no": "Sett vannivå til [[level]]%"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=controller"
+          },
+          {
+            "type": "number",
+            "name": "level",
+            "min": 0,
+            "max": 250,
+            "title": {
+              "en": "Percent",
+              "no": "Prosent"
+            }
+          }
+        ],
+        "id": "set_water_level"
+      },
+      {
+        "title": {
+          "en": "Stop all zones",
+          "no": "Stopp alle soner"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=controller"
+          }
+        ],
+        "id": "stop_all"
+      },
+      {
+        "title": {
+          "en": "Stop zone",
+          "no": "Stopp sone"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=station"
+          }
+        ],
+        "id": "stop_station"
+      }
+    ]
+  },
+  "drivers": [
+    {
+      "name": {
+        "en": "OpenSprinkler controller",
+        "no": "OpenSprinkler-kontroller"
+      },
+      "class": "sprinkler",
+      "capabilities": [
+        "onoff",
+        "os_running",
+        "os_water_level",
+        "os_rain_delay",
+        "os_rain_delay_end",
+        "alarm_water"
+      ],
+      "capabilitiesOptions": {
+        "onoff": {
+          "title": {
+            "en": "Controller enabled",
+            "no": "Kontroller aktivert"
+          }
+        },
+        "alarm_water": {
+          "title": {
+            "en": "Rain sensor",
+            "no": "Regnsensor"
+          }
+        }
+      },
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "images": {
+        "small": "/drivers/controller/assets/images/small.png",
+        "large": "/drivers/controller/assets/images/large.png"
+      },
+      "pair": [
+        {
+          "id": "start"
+        }
+      ],
+      "repair": [
+        {
+          "id": "start"
+        }
+      ],
+      "settings": [
+        {
+          "id": "host",
+          "type": "text",
+          "label": {
+            "en": "Host / IP",
+            "no": "Vert / IP"
+          },
+          "value": ""
+        },
+        {
+          "id": "password",
+          "type": "password",
+          "label": {
+            "en": "Password (leave empty to keep)",
+            "no": "Passord (tomt = behold)"
+          },
+          "value": ""
+        },
+        {
+          "id": "poll_interval",
+          "type": "number",
+          "label": {
+            "en": "Poll interval",
+            "no": "Oppdateringsintervall"
+          },
+          "units": {
+            "en": "s"
+          },
+          "value": 10,
+          "min": 3,
+          "max": 300
+        }
+      ],
+      "id": "controller"
+    },
+    {
+      "name": {
+        "en": "OpenSprinkler zone",
+        "no": "OpenSprinkler-sone"
+      },
+      "class": "sprinkler",
+      "capabilities": [
+        "onoff",
+        "os_status",
+        "os_remaining"
+      ],
+      "capabilitiesOptions": {
+        "onoff": {
+          "title": {
+            "en": "Watering",
+            "no": "Vanner"
+          }
+        }
+      },
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "images": {
+        "small": "/drivers/station/assets/images/small.png",
+        "large": "/drivers/station/assets/images/large.png"
+      },
+      "pair": [
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "settings": [
+        {
+          "id": "duration",
+          "type": "number",
+          "label": {
+            "en": "Default run time",
+            "no": "Standard kjøretid"
+          },
+          "units": {
+            "en": "min"
+          },
+          "value": 10,
+          "min": 1,
+          "max": 720,
+          "hint": {
+            "en": "Used when the zone is switched on from Homey.",
+            "no": "Brukes når sonen slås på fra Homey."
+          }
+        }
+      ],
+      "id": "station"
+    }
+  ],
+  "widgets": {
+    "controller": {
+      "name": {
+        "en": "OpenSprinkler controller",
+        "no": "OpenSprinkler-kontroller"
+      },
+      "height": 230,
+      "settings": [
+        {
+          "id": "controller",
+          "type": "autocomplete",
+          "title": {
+            "en": "Controller",
+            "no": "Kontroller"
+          }
+        }
+      ],
+      "api": {
+        "getStatus": {
+          "method": "GET",
+          "path": "/status"
+        },
+        "runZone": {
+          "method": "POST",
+          "path": "/run"
+        },
+        "stopZone": {
+          "method": "POST",
+          "path": "/stop"
+        },
+        "command": {
+          "method": "POST",
+          "path": "/command"
+        }
+      },
+      "id": "controller"
+    },
+    "zones": {
+      "name": {
+        "en": "OpenSprinkler zones",
+        "no": "OpenSprinkler-soner"
+      },
+      "height": 320,
+      "settings": [
+        {
+          "id": "controller",
+          "type": "autocomplete",
+          "title": {
+            "en": "Controller",
+            "no": "Kontroller"
+          }
+        },
+        {
+          "id": "minutes",
+          "type": "number",
+          "title": {
+            "en": "Default run time (min)",
+            "no": "Standard kjøretid (min)"
+          },
+          "value": 10,
+          "min": 1,
+          "max": 720
+        },
+        {
+          "id": "show_disabled",
+          "type": "checkbox",
+          "title": {
+            "en": "Show disabled zones",
+            "no": "Vis deaktiverte soner"
+          },
+          "value": false
+        }
+      ],
+      "api": {
+        "getStatus": {
+          "method": "GET",
+          "path": "/status"
+        },
+        "runZone": {
+          "method": "POST",
+          "path": "/run"
+        },
+        "stopZone": {
+          "method": "POST",
+          "path": "/stop"
+        },
+        "command": {
+          "method": "POST",
+          "path": "/command"
+        }
+      },
+      "id": "zones"
+    }
+  },
+  "capabilities": {
+    "os_rain_delay": {
+      "type": "boolean",
+      "title": {
+        "en": "Rain delay",
+        "no": "Regnforsinkelse"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/rain.svg",
+      "insights": true,
+      "insightsTitleTrue": {
+        "en": "Rain delay active",
+        "no": "Regnforsinkelse aktiv"
+      },
+      "insightsTitleFalse": {
+        "en": "Rain delay ended",
+        "no": "Regnforsinkelse avsluttet"
+      }
+    },
+    "os_rain_delay_end": {
+      "type": "string",
+      "title": {
+        "en": "Rain delay until",
+        "no": "Regnforsinkelse til"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/rain.svg"
+    },
+    "os_remaining": {
+      "type": "number",
+      "title": {
+        "en": "Remaining",
+        "no": "Gjenstår"
+      },
+      "units": {
+        "en": "min"
+      },
+      "decimals": 1,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/timer.svg"
+    },
+    "os_running": {
+      "type": "number",
+      "title": {
+        "en": "Running zones",
+        "no": "Aktive soner"
+      },
+      "getable": true,
+      "setable": false,
+      "decimals": 0,
+      "uiComponent": "sensor",
+      "icon": "/assets/water.svg"
+    },
+    "os_status": {
+      "type": "string",
+      "title": {
+        "en": "Status",
+        "no": "Status"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/water.svg"
+    },
+    "os_water_level": {
+      "type": "number",
+      "title": {
+        "en": "Water level",
+        "no": "Vannivå"
+      },
+      "units": {
+        "en": "%"
+      },
+      "min": 0,
+      "max": 250,
+      "decimals": 0,
+      "getable": true,
+      "setable": true,
+      "uiComponent": "slider",
+      "icon": "/assets/water.svg",
+      "insights": true
+    }
+  }
+}

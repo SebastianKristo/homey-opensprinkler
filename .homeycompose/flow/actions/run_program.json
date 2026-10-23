@@ -1,0 +1,2 @@
+{ "title": { "en": "Run program", "no": "Kjør program" }, "titleFormatted": { "en": "Run program [[program]] (weather adjust: [[use_weather]])", "no": "Kjør program [[program]] (værjustering: [[use_weather]])" },
+  "args": [ { "type": "device", "name": "device", "filter": "driver_id=controller" }, { "type": "autocomplete", "name": "program", "title": { "en": "Program", "no": "Program" } }, { "type": "dropdown", "name": "use_weather", "values": [ { "id": "no", "title": { "en": "No", "no": "Nei" } }, { "id": "yes", "title": { "en": "Yes", "no": "Ja" } } ] } ] }

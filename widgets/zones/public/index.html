@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { margin: 0; padding: var(--homey-su-2, 8px); font-family: var(--homey-font-family, sans-serif); color: var(--homey-text-color, #000); }
+  .head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .title { font-weight: var(--homey-font-weight-bold, 600); font-size: var(--homey-font-size-default, 15px); }
+  .sub { font-size: var(--homey-font-size-small, 12px); color: var(--homey-text-color-light, #888); }
+  .zone { display: flex; align-items: center; gap: 8px; padding: 8px 4px; border-bottom: 1px solid var(--homey-line-color, #eee); }
+  .zone:last-child { border-bottom: 0; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--homey-color-mono-200, #ccc); flex: none; }
+  .zone.running .dot { background: #2196f3; box-shadow: 0 0 0 3px rgba(33,150,243,.25); animation: p 1.5s infinite; }
+  .zone.waiting .dot { background: #ffb300; }
+  @keyframes p { 50% { box-shadow: 0 0 0 6px rgba(33,150,243,.05); } }
+  .info { flex: 1; min-width: 0; }
+  .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: var(--homey-font-size-default, 15px); }
+  button { border: 0; border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 13px; cursor: pointer;
+    background: var(--homey-color-mono-050, #f2f2f2); color: var(--homey-text-color, #000); }
+  button.go { background: #2e7d32; color: #fff; }
+  button.stop { background: #c62828; color: #fff; }
+  select { font: inherit; font-size: 13px; border-radius: 8px; padding: 4px; background: transparent; color: inherit; border: 1px solid var(--homey-line-color, #ddd); }
+  .err { color: #c62828; font-size: 13px; padding: 8px 0; }
+</style>
+</head>
+<body>
+  <div class="head">
+    <div><div class="title" id="title">OpenSprinkler</div><div class="sub" id="sub"></div></div>
+    <div><select id="mins"></select> <button class="stop" id="stopAll" style="display:none">Stop</button></div>
+  </div>
+  <div id="list"></div>
+  <script type="text/javascript">
+  function onHomeyReady(Homey) {
+    const settings = Homey.getSettings() || {};
+    const ctrlId = settings.controller && settings.controller.id;
+    const $ = id => document.getElementById(id);
+    const mins = $('mins');
+    [1, 2, 5, 10, 15, 20, 30, 45, 60, 90, 120].concat([Number(settings.minutes) || 10])
+      .filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => a - b)
+      .forEach(m => { const o = document.createElement('option'); o.value = m; o.textContent = `${m} min`; mins.appendChild(o); });
+    mins.value = Number(settings.minutes) || 10;
+
+    let state = null; let fetchedAt = 0; let busy = false;
+    const fmt = s => { s = Math.max(0, Math.round(s)); const m = Math.floor(s / 60); return `${m}:${String(s % 60).padStart(2, '0')}`; };
+
+    function render() {
+      if (!state) return;
+      const elapsed = (Date.now() - fetchedAt) / 1000;
+      $('title').textContent = state.name;
+      const running = state.zones.filter(z => z.running && !z.isMaster);
+      const flags = [];
+      if (!state.enabled) flags.push('Disabled');
+      if (state.rainDelay) flags.push('Rain delay');
+      if (state.sensor1) flags.push('Rain sensor');
+      flags.push(`${running.length} ${'active'} · ${state.waterLevel}%`);
+      $('sub').textContent = flags.join(' · ');
+      $('stopAll').style.display = running.length || state.zones.some(z => z.waiting) ? '' : 'none';
+
+      const list = $('list'); list.innerHTML = '';
+      state.zones.filter(z => !z.isMaster && (settings.show_disabled || !z.disabled)).forEach(z => {
+        const row = document.createElement('div');
+        row.className = `zone${z.running ? ' running' : ''}${z.waiting ? ' waiting' : ''}`;
+        let detail = z.disabled ? 'Disabled' : 'Idle';
+        if (z.running) detail = `${fmt(z.remaining - elapsed)}${z.program ? ` · ${z.program}` : ''}`;
+        else if (z.waiting) detail = `Waiting${z.program ? ` · ${z.program}` : ''}`;
+        row.innerHTML = '<div class="dot"></div><div class="info"><div class="name"></div><div class="sub"></div></div>';
+        row.querySelector('.name').textContent = z.name;
+        row.querySelector('.sub').textContent = detail;
+        if (!z.disabled) {
+          const b = document.createElement('button');
+          const on = z.running || z.waiting;
+          b.className = on ? 'stop' : 'go';
+          b.textContent = on ? '■' : '▶';
+          b.onclick = () => call(on ? '/stop' : '/run', { controller: ctrlId, sid: z.sid, minutes: Number(mins.value) });
+          row.appendChild(b);
+        }
+        list.appendChild(row);
+      });
+    }
+
+    function setState(s) { state = s; fetchedAt = Date.now(); render(); }
+    function showError(err) { $('list').innerHTML = ''; const e = document.createElement('div'); e.className = 'err'; e.textContent = err.message || err; $('list').appendChild(e); }
+
+    async function call(path, body) {
+      if (busy) return; busy = true;
+      try { setState(await Homey.api('POST', path, body)); Homey.hapticFeedback && Homey.hapticFeedback(); } catch (err) { showError(err); }
+      busy = false;
+    }
+    async function poll() {
+      try { setState(await Homey.api('GET', `/status?controller=${encodeURIComponent(ctrlId || '')}`)); } catch (err) { showError(err); }
+    }
+    $('stopAll').onclick = () => call('/command', { controller: ctrlId, action: 'stopAll' });
+
+    poll().then(() => Homey.ready());
+    setInterval(poll, 10000);
+    setInterval(render, 1000);
+  }
+  </script>
+</body>
+</html>

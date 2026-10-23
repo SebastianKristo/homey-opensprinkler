@@ -1,0 +1,5 @@
+{
+  "pair": { "title": "Koble til OpenSprinkler", "host": "Vertsnavn eller IP-adresse", "password": "Enhetspassord", "connect": "Koble til",
+    "no_host": "Skriv inn vertsnavn eller IP-adresse", "no_controller": "Legg til en OpenSprinkler-kontroller først" },
+  "device": { "controller_missing": "Fant ikke OpenSprinkler-kontrolleren" }
+}

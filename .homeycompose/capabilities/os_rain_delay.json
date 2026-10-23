@@ -1,0 +1,4 @@
+{ "type": "boolean", "title": { "en": "Rain delay", "no": "Regnforsinkelse" }, "getable": true, "setable": false,
+  "uiComponent": "sensor", "icon": "/assets/rain.svg", "insights": true,
+  "insightsTitleTrue": { "en": "Rain delay active", "no": "Regnforsinkelse aktiv" },
+  "insightsTitleFalse": { "en": "Rain delay ended", "no": "Regnforsinkelse avsluttet" } }

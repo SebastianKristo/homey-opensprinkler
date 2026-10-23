@@ -1,0 +1,1 @@
+{ "type": "string", "title": { "en": "Status", "no": "Status" }, "getable": true, "setable": false, "uiComponent": "sensor", "icon": "/assets/water.svg" }

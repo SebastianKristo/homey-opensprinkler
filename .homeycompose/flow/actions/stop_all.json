@@ -1,0 +1,1 @@
+{ "title": { "en": "Stop all zones", "no": "Stopp alle soner" }, "args": [ { "type": "device", "name": "device", "filter": "driver_id=controller" } ] }

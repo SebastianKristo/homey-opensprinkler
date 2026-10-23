@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { margin: 0; padding: var(--homey-su-2, 8px); font-family: var(--homey-font-family, sans-serif); color: var(--homey-text-color, #000); }
+  .title { font-weight: var(--homey-font-weight-bold, 600); font-size: var(--homey-font-size-default, 15px); margin-bottom: 8px; }
+  .row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--homey-line-color, #eee); font-size: 14px; }
+  .row:last-child { border-bottom: 0; }
+  .val { color: var(--homey-text-color-light, #888); }
+  .btns { display: flex; gap: 6px; }
+  button { border: 0; border-radius: 999px; padding: 5px 10px; font: inherit; font-size: 13px; cursor: pointer; background: var(--homey-color-mono-050, #f2f2f2); color: var(--homey-text-color, #000); }
+  button.on { background: #2e7d32; color: #fff; }
+  button.off { background: #c62828; color: #fff; }
+  .err { color: #c62828; font-size: 13px; }
+</style>
+</head>
+<body>
+  <div class="title" id="title">OpenSprinkler</div>
+  <div id="body"></div>
+  <script type="text/javascript">
+  function onHomeyReady(Homey) {
+    const settings = Homey.getSettings() || {};
+    const ctrlId = settings.controller && settings.controller.id;
+    const $ = id => document.getElementById(id);
+    let busy = false;
+
+    function row(label, value, buttons = []) {
+      const r = document.createElement('div'); r.className = 'row';
+      const l = document.createElement('div'); l.textContent = label; r.appendChild(l);
+      const right = document.createElement('div'); right.className = 'btns';
+      if (value != null) { const v = document.createElement('span'); v.className = 'val'; v.textContent = value; right.appendChild(v); }
+      buttons.forEach(([text, cls, action, val]) => {
+        const b = document.createElement('button'); b.textContent = text; if (cls) b.className = cls;
+        b.onclick = () => cmd(action, val); right.appendChild(b);
+      });
+      r.appendChild(right); return r;
+    }
+
+    function render(s) {
+      $('title').textContent = s.name;
+      const body = $('body'); body.innerHTML = '';
+      const running = s.zones.filter(z => z.running && !z.isMaster);
+      body.appendChild(row('Controller', null, [[s.enabled ? 'On' : 'Off', s.enabled ? 'on' : 'off', 'enable', !s.enabled]]));
+      body.appendChild(row('Running', running.length ? running.map(z => z.name).join(', ') : '–',
+        running.length ? [['Stop all', 'off', 'stopAll']] : []));
+      const rdEnd = s.rainDelay && s.rainDelayEnd ? new Date(s.rainDelayEnd * 1000).toISOString().slice(5, 16).replace('T', ' ') : null;
+      body.appendChild(row('Rain delay', rdEnd ? `until ${rdEnd}` : null,
+        s.rainDelay ? [['Cancel', '', 'rainDelay', 0]] : [['12h', '', 'rainDelay', 12], ['24h', '', 'rainDelay', 24], ['48h', '', 'rainDelay', 48]]));
+      body.appendChild(row('Water level', `${s.waterLevel}%`, [['−', '', 'waterLevel', Math.max(0, s.waterLevel - 10)], ['+', '', 'waterLevel', Math.min(250, s.waterLevel + 10)]]));
+      body.appendChild(row('Rain sensor', s.sensor1 ? 'Rain detected' : 'Dry'));
+    }
+    function showError(err) { $('body').innerHTML = ''; const e = document.createElement('div'); e.className = 'err'; e.textContent = err.message || err; $('body').appendChild(e); }
+
+    async function cmd(action, value) {
+      if (busy) return; busy = true;
+      try { render(await Homey.api('POST', '/command', { controller: ctrlId, action, value })); } catch (err) { showError(err); }
+      busy = false;
+    }
+    async function poll() {
+      try { render(await Homey.api('GET', `/status?controller=${encodeURIComponent(ctrlId || '')}`)); } catch (err) { showError(err); }
+    }
+    poll().then(() => Homey.ready());
+    setInterval(poll, 10000);
+  }
+  </script>
+</body>
+</html>

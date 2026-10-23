@@ -1,0 +1,3 @@
+{ "title": { "en": "Set rain delay", "no": "Sett regnforsinkelse" }, "titleFormatted": { "en": "Set rain delay to [[hours]] hours", "no": "Sett regnforsinkelse til [[hours]] timer" },
+  "hint": { "en": "0 hours cancels the rain delay.", "no": "0 timer avbryter regnforsinkelsen." },
+  "args": [ { "type": "device", "name": "device", "filter": "driver_id=controller" }, { "type": "number", "name": "hours", "min": 0, "max": 32767, "title": { "en": "Hours", "no": "Timer" } } ] }

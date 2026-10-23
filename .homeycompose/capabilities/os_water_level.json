@@ -1,0 +1,2 @@
+{ "type": "number", "title": { "en": "Water level", "no": "Vannivå" }, "units": { "en": "%" }, "min": 0, "max": 250, "decimals": 0,
+  "getable": true, "setable": true, "uiComponent": "slider", "icon": "/assets/water.svg", "insights": true }

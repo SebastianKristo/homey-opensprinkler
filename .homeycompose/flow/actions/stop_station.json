@@ -1,0 +1,1 @@
+{ "title": { "en": "Stop zone", "no": "Stopp sone" }, "args": [ { "type": "device", "name": "device", "filter": "driver_id=station" } ] }

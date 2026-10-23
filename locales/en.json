@@ -1,0 +1,5 @@
+{
+  "pair": { "title": "Connect to OpenSprinkler", "host": "Host or IP address", "password": "Device password", "connect": "Connect",
+    "no_host": "Please enter a host or IP address", "no_controller": "Add an OpenSprinkler controller first" },
+  "device": { "controller_missing": "OpenSprinkler controller not found" }
+}

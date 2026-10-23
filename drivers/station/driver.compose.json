@@ -1,0 +1,19 @@
+{
+  "name": { "en": "OpenSprinkler zone", "no": "OpenSprinkler-sone" },
+  "class": "sprinkler",
+  "capabilities": ["onoff", "os_status", "os_remaining"],
+  "capabilitiesOptions": {
+    "onoff": { "title": { "en": "Watering", "no": "Vanner" } }
+  },
+  "platforms": ["local"],
+  "connectivity": ["lan"],
+  "images": { "small": "{{driverAssetsPath}}/images/small.png", "large": "{{driverAssetsPath}}/images/large.png" },
+  "pair": [
+    { "id": "list_devices", "template": "list_devices", "navigation": { "next": "add_devices" } },
+    { "id": "add_devices", "template": "add_devices" }
+  ],
+  "settings": [
+    { "id": "duration", "type": "number", "label": { "en": "Default run time", "no": "Standard kjøretid" }, "units": { "en": "min" }, "value": 10, "min": 1, "max": 720,
+      "hint": { "en": "Used when the zone is switched on from Homey.", "no": "Brukes når sonen slås på fra Homey." } }
+  ]
+}

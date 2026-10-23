@@ -1,0 +1,2 @@
+{ "title": { "en": "Enable/disable program", "no": "Aktiver/deaktiver program" }, "titleFormatted": { "en": "Turn program [[program]] [[state]]", "no": "Slå program [[program]] [[state]]" },
+  "args": [ { "type": "device", "name": "device", "filter": "driver_id=controller" }, { "type": "autocomplete", "name": "program", "title": { "en": "Program", "no": "Program" } }, { "type": "dropdown", "name": "state", "values": [ { "id": "on", "title": { "en": "on", "no": "på" } }, { "id": "off", "title": { "en": "off", "no": "av" } } ] } ] }

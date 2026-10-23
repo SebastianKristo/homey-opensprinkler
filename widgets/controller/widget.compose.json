@@ -1,0 +1,13 @@
+{
+  "name": { "en": "OpenSprinkler controller", "no": "OpenSprinkler-kontroller" },
+  "height": 230,
+  "settings": [
+    { "id": "controller", "type": "autocomplete", "title": { "en": "Controller", "no": "Kontroller" } }
+  ],
+  "api": {
+    "getStatus": { "method": "GET", "path": "/status" },
+    "runZone": { "method": "POST", "path": "/run" },
+    "stopZone": { "method": "POST", "path": "/stop" },
+    "command": { "method": "POST", "path": "/command" }
+  }
+}

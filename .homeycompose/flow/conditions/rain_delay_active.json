@@ -1,0 +1,1 @@
+{ "title": { "en": "Rain delay !{{is|is not}} active", "no": "Regnforsinkelse !{{er|er ikke}} aktiv" }, "args": [ { "type": "device", "name": "device", "filter": "driver_id=controller" } ] }

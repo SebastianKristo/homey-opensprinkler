@@ -1,0 +1,1 @@
+{ "type": "number", "title": { "en": "Running zones", "no": "Aktive soner" }, "getable": true, "setable": false, "decimals": 0, "uiComponent": "sensor", "icon": "/assets/water.svg" }

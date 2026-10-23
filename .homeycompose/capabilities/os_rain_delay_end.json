@@ -1,0 +1,1 @@
+{ "type": "string", "title": { "en": "Rain delay until", "no": "Regnforsinkelse til" }, "getable": true, "setable": false, "uiComponent": "sensor", "icon": "/assets/rain.svg" }

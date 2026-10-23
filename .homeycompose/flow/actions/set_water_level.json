@@ -1,0 +1,2 @@
+{ "title": { "en": "Set water level", "no": "Sett vannivå" }, "titleFormatted": { "en": "Set water level to [[level]]%", "no": "Sett vannivå til [[level]]%" },
+  "args": [ { "type": "device", "name": "device", "filter": "driver_id=controller" }, { "type": "number", "name": "level", "min": 0, "max": 250, "title": { "en": "Percent", "no": "Prosent" } } ] }

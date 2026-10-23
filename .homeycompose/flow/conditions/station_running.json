@@ -1,0 +1,1 @@
+{ "title": { "en": "Zone !{{is|is not}} watering", "no": "Sone !{{vanner|vanner ikke}}" }, "args": [ { "type": "device", "name": "device", "filter": "driver_id=station" } ] }

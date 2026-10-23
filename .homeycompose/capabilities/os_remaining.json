@@ -1,0 +1,1 @@
+{ "type": "number", "title": { "en": "Remaining", "no": "Gjenstår" }, "units": { "en": "min" }, "decimals": 1, "getable": true, "setable": false, "uiComponent": "sensor", "icon": "/assets/timer.svg" }

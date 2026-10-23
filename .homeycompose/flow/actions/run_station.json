@@ -1,0 +1,2 @@
+{ "title": { "en": "Run zone", "no": "Kjør sone" }, "titleFormatted": { "en": "Run zone for [[minutes]] minutes", "no": "Kjør sone i [[minutes]] minutter" },
+  "args": [ { "type": "device", "name": "device", "filter": "driver_id=station" }, { "type": "number", "name": "minutes", "min": 1, "max": 720, "title": { "en": "Minutes", "no": "Minutter" } } ] }
