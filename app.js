@@ -2,6 +2,7 @@
 
 const Homey = require('homey');
 const WaterTracker = require('./lib/WaterTracker');
+const MasterValve = require('./lib/MasterValve');
 
 module.exports = class OpenSprinklerApp extends Homey.App {
 
@@ -9,8 +10,12 @@ module.exports = class OpenSprinklerApp extends Homey.App {
     this._registerFlow();
     this._registerWidgets();
     this.water = new WaterTracker(this);
+    this.valve = new MasterValve(this, () => this.water._api());
     // Give devices a moment to initialise before attaching to the meter.
-    this.homey.setTimeout(() => this.water.start().catch(err => this.error('Water tracker:', err.message)), 5000);
+    this.homey.setTimeout(() => {
+      this.water.start().catch(err => this.error('Water tracker:', err.message));
+      this.valve.start().catch(err => this.error('Master valve:', err.message));
+    }, 5000);
     this.log('OpenSprinkler app started');
   }
 
@@ -59,7 +64,11 @@ module.exports = class OpenSprinklerApp extends Homey.App {
     };
 
     cards.getActionCard('run_program')
-      .registerRunListener(({ device, program, use_weather: uwt }) => device.api.runProgram(program.id, uwt === 'yes').then(() => device.refresh()))
+      .registerRunListener(async ({ device, program, use_weather: uwt }) => {
+        await this.valve.beforeRun();
+        await device.api.runProgram(program.id, uwt === 'yes');
+        return device.refresh();
+      })
       .registerArgumentAutocompleteListener('program', programAutocomplete);
 
     cards.getActionCard('set_program_enabled')

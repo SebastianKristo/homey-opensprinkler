@@ -30,7 +30,14 @@
     "last_run": "Last run",
     "total": "Total",
     "unassigned": "Not attributed to any zone",
-    "saved": "Saved"
+    "saved": "Saved",
+    "valve": "Master valve",
+    "valve_intro": "Turned on every time a zone starts (e.g. a Sonoff water valve that closes itself after a period without flow).",
+    "valve_device": "Valve device",
+    "valve_keep": "Turn back on if it closes while a zone is watering",
+    "valve_off": "Turn off when all zones are finished",
+    "valve_test": "Turn valve on now",
+    "valve_tested": "Valve turned on"
   },
   "widget": {
     "zones": "Zones",

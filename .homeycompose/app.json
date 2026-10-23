@@ -1,6 +1,6 @@
 {
   "id": "no.opensprinkler",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "compatibility": ">=12.3.0",
   "sdk": 3,
   "platforms": [
@@ -42,6 +42,14 @@
     "reset": {
       "method": "POST",
       "path": "/reset"
+    },
+    "getValves": {
+      "method": "GET",
+      "path": "/valves"
+    },
+    "testValve": {
+      "method": "POST",
+      "path": "/valve/test"
     }
   }
 }

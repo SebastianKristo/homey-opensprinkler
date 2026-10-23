@@ -48,6 +48,7 @@ module.exports = class ControllerDevice extends Homey.Device {
       await this._updateCapabilities(state);
       if (!this.getAvailable()) await this.setAvailable();
       this.emit('state', state);
+      if (this.homey.app.valve) this.homey.app.valve.onState(this.getData().id, state);
     } catch (err) {
       this.error('Refresh failed:', err.message);
       await this.setUnavailable(err.message).catch(this.error);
@@ -59,6 +60,7 @@ module.exports = class ControllerDevice extends Homey.Device {
 
   async runStation(sid, seconds) {
     this.runTotals[sid] = Math.max(1, Math.round(seconds));
+    if (this.homey.app.valve) await this.homey.app.valve.beforeRun();
     await this.api.runStation(sid, seconds);
     return this.refresh();
   }

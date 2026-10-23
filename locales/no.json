@@ -30,7 +30,14 @@
     "last_run": "Siste kjøring",
     "total": "Totalt",
     "unassigned": "Ikke tilordnet noen sone",
-    "saved": "Lagret"
+    "saved": "Lagret",
+    "valve": "Hovedventil",
+    "valve_intro": "Slås på hver gang en sone starter (f.eks. en Sonoff vannventil som stenger seg selv etter en periode uten vannflyt).",
+    "valve_device": "Ventilenhet",
+    "valve_keep": "Slå på igjen hvis den stenger mens en sone vanner",
+    "valve_off": "Slå av når alle soner er ferdige",
+    "valve_test": "Slå på ventilen nå",
+    "valve_tested": "Ventilen er slått på"
   },
   "widget": {
     "zones": "Soner",

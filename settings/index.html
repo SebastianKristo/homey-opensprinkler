@@ -44,6 +44,27 @@
   </fieldset>
 
   <fieldset class="homey-form-fieldset">
+    <legend class="homey-form-legend" data-i18n="settings.valve"></legend>
+    <p class="homey-form-hint" data-i18n="settings.valve_intro"></p>
+    <div class="homey-form-group">
+      <label class="homey-form-label" for="valve" data-i18n="settings.valve_device"></label>
+      <select class="homey-form-select" id="valve"></select>
+    </div>
+    <label class="homey-form-checkbox">
+      <input class="homey-form-checkbox-input" type="checkbox" id="keepOn" />
+      <span class="homey-form-checkbox-checkmark"></span>
+      <span class="homey-form-checkbox-text" data-i18n="settings.valve_keep"></span>
+    </label>
+    <label class="homey-form-checkbox">
+      <input class="homey-form-checkbox-input" type="checkbox" id="offWhenDone" />
+      <span class="homey-form-checkbox-checkmark"></span>
+      <span class="homey-form-checkbox-text" data-i18n="settings.valve_off"></span>
+    </label>
+    <button class="homey-button-primary-full" id="saveValve" data-i18n="settings.save"></button>
+    <button class="homey-button-secondary-full" id="testValve" data-i18n="settings.valve_test"></button>
+  </fieldset>
+
+  <fieldset class="homey-form-fieldset">
     <legend class="homey-form-legend" data-i18n="settings.zones"></legend>
     <p id="live"></p>
     <table id="zones"></table>
@@ -100,6 +121,15 @@
       $('unit').value = cfg.meterUnit || 'm3';
       $('grace').value = cfg.graceSeconds != null ? cfg.graceSeconds : 60;
       $('device').onchange = () => fillCaps(null);
+
+      const vcfg = (status && status.valve && status.valve.config) || {};
+      let valves = [];
+      try { valves = await Homey.api('GET', '/valves'); } catch (err) { /* shown below */ }
+      opt($('valve'), '', t('none'));
+      valves.forEach(v => opt($('valve'), v.id, v.name));
+      $('valve').value = vcfg.deviceId || '';
+      $('keepOn').checked = vcfg.keepOn !== false;
+      $('offWhenDone').checked = !!vcfg.offWhenDone;
       Homey.ready();
     }
 
@@ -115,6 +145,16 @@
         Homey.alert(t('saved'));
         setTimeout(loadStatus, 1500);
       });
+    };
+    $('saveValve').onclick = () => {
+      Homey.set('valve', {
+        deviceId: $('valve').value || null,
+        keepOn: $('keepOn').checked,
+        offWhenDone: $('offWhenDone').checked,
+      }, err => (err ? Homey.alert(err.message || err) : Homey.alert(t('saved'))));
+    };
+    $('testValve').onclick = async () => {
+      try { await Homey.api('POST', '/valve/test'); Homey.alert(t('valve_tested')); } catch (err) { Homey.alert(err.message || err); }
     };
     $('reset').onclick = () => Homey.confirm(t('reset_confirm'), 'warning', async (err, ok) => {
       if (!ok) return;
