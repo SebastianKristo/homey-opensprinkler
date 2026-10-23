@@ -19,6 +19,16 @@ class StationDevice extends Homey.Device {
       if (!this.hasCapability(cap)) await this.addCapability(cap).catch(this.error);
     }
 
+    // Quick-run buttons with fixed durations.
+    for (const min of StationDevice.QUICK_RUN_MINUTES) {
+      const cap = `button.run_${min}`;
+      if (!this.hasCapability(cap)) {
+        await this.addCapability(cap).catch(this.error);
+        await this.setCapabilityOptions(cap, { title: { en: `Run ${min} min`, no: `Kjør ${min} min` } }).catch(this.error);
+      }
+      this.registerCapabilityListener(cap, () => this.run(min * 60));
+    }
+
     this._attach();
   }
 
@@ -133,5 +143,7 @@ class StationDevice extends Homey.Device {
   }
 
 }
+
+StationDevice.QUICK_RUN_MINUTES = [5, 10, 15, 30, 60];
 
 module.exports = StationDevice;
