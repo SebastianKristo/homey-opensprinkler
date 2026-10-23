@@ -1,6 +1,6 @@
 {
   "id": "no.kristo.opensprinkler",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "compatibility": ">=12.3.0",
   "sdk": 3,
   "platforms": [
@@ -20,7 +20,7 @@
   "permissions": [
     "homey:manager:api"
   ],
-  "brandColor": "#2AD4C8",
+  "brandColor": "#3B8EEA",
   "images": {
     "small": "/assets/images/small.png",
     "large": "/assets/images/large.png",
