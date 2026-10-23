@@ -74,6 +74,35 @@
         "en": "Used when the zone is switched on from Homey.",
         "no": "Brukes når sonen slås på fra Homey."
       }
+    },
+    {
+      "id": "sprinkler_type",
+      "type": "dropdown",
+      "label": {
+        "en": "Zone type",
+        "no": "Sonetype"
+      },
+      "value": "drip",
+      "hint": {
+        "en": "The icon follows the type. Homey only applies a new icon when the zone is paired again.",
+        "no": "Ikonet følger typen. Homey bytter ikon først når sonen pares på nytt."
+      },
+      "values": [
+        {
+          "id": "drip",
+          "label": {
+            "en": "Drip",
+            "no": "Drypp"
+          }
+        },
+        {
+          "id": "spray",
+          "label": {
+            "en": "Sprinkler",
+            "no": "Spreder"
+          }
+        }
+      ]
     }
   ]
 }

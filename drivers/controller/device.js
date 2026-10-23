@@ -7,6 +7,7 @@ module.exports = class ControllerDevice extends Homey.Device {
 
   async onInit() {
     this.state = null;
+    this.runTotals = {};
     this.setMaxListeners(100);
     this.reconnect();
 
@@ -37,6 +38,12 @@ module.exports = class ControllerDevice extends Homey.Device {
   async refresh() {
     try {
       const state = await this.api.getState();
+      for (const z of state.zones) {
+        // Run length is known when started from Homey; otherwise use the first remaining time seen.
+        if (z.running && !this.runTotals[z.sid]) this.runTotals[z.sid] = z.remaining;
+        if (!z.running && !z.waiting) delete this.runTotals[z.sid];
+        z.total = z.running ? Math.max(this.runTotals[z.sid] || 0, z.remaining) : 0;
+      }
       this.state = state;
       await this._updateCapabilities(state);
       if (!this.getAvailable()) await this.setAvailable();
@@ -48,6 +55,12 @@ module.exports = class ControllerDevice extends Homey.Device {
     }
     this._schedule((this.getSetting('poll_interval') || 10) * 1000);
     return this.state;
+  }
+
+  async runStation(sid, seconds) {
+    this.runTotals[sid] = Math.max(1, Math.round(seconds));
+    await this.api.runStation(sid, seconds);
+    return this.refresh();
   }
 
   async _updateCapabilities(s) {

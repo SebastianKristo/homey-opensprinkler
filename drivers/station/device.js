@@ -1,6 +1,7 @@
 'use strict';
 
 const Homey = require('homey');
+const { parseZoneName } = require('../../lib/zoneName');
 
 module.exports = class StationDevice extends Homey.Device {
 
@@ -65,10 +66,12 @@ module.exports = class StationDevice extends Homey.Device {
     const z = state.zones[this.sid];
     if (!z) return;
     if (!this.getAvailable()) await this.setAvailable();
-    let status = 'Idle';
-    if (z.disabled) status = 'Disabled';
-    else if (z.running) status = z.program ? `Running (${z.program})` : 'Running';
-    else if (z.waiting) status = 'Waiting';
+    const parsed = parseZoneName(z.name, this.sid);
+    const typeLabel = this.getSetting('sprinkler_type') === 'spray' ? 'Spreder' : 'Drypp';
+    let status = parsed.valve ? `Av · ${typeLabel} ${parsed.valve}` : `Av · ${typeLabel}`;
+    if (z.disabled) status = 'Deaktivert';
+    else if (z.running) status = z.program ? `Vanner (${z.program})` : 'Vanner';
+    else if (z.waiting) status = 'Venter';
     const remaining = Math.round((z.remaining / 60) * 10) / 10;
     const set = (cap, val) => (this.getCapabilityValue(cap) !== val ? this.setCapabilityValue(cap, val) : null);
     const wasRunning = this.getCapabilityValue('onoff') === true;
@@ -83,8 +86,7 @@ module.exports = class StationDevice extends Homey.Device {
 
   async run(seconds) {
     const ctrl = this._getController();
-    await ctrl.api.runStation(this.sid, seconds);
-    await ctrl.refresh();
+    await ctrl.runStation(this.sid, seconds);
   }
 
   async stop() {

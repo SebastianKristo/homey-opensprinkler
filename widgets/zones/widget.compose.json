@@ -1,15 +1,79 @@
 {
-  "name": { "en": "OpenSprinkler zones", "no": "OpenSprinkler-soner" },
-  "height": 320,
+  "name": {
+    "en": "OpenSprinkler zones",
+    "no": "OpenSprinkler-soner"
+  },
+  "height": 520,
   "settings": [
-    { "id": "controller", "type": "autocomplete", "title": { "en": "Controller", "no": "Kontroller" } },
-    { "id": "minutes", "type": "number", "title": { "en": "Default run time (min)", "no": "Standard kjøretid (min)" }, "value": 10, "min": 1, "max": 720 },
-    { "id": "show_disabled", "type": "checkbox", "title": { "en": "Show disabled zones", "no": "Vis deaktiverte soner" }, "value": false }
+    {
+      "id": "controller",
+      "type": "autocomplete",
+      "title": {
+        "en": "Controller",
+        "no": "Kontroller"
+      }
+    },
+    {
+      "id": "defaultMinutes",
+      "type": "dropdown",
+      "title": {
+        "en": "Default run time",
+        "no": "Standard kjøretid"
+      },
+      "value": "10",
+      "values": [
+        {
+          "id": "5",
+          "title": {
+            "en": "5 min"
+          }
+        },
+        {
+          "id": "10",
+          "title": {
+            "en": "10 min"
+          }
+        },
+        {
+          "id": "15",
+          "title": {
+            "en": "15 min"
+          }
+        },
+        {
+          "id": "30",
+          "title": {
+            "en": "30 min"
+          }
+        }
+      ]
+    },
+    {
+      "id": "show_disabled",
+      "type": "checkbox",
+      "title": {
+        "en": "Show disabled zones",
+        "no": "Vis deaktiverte soner"
+      },
+      "value": false
+    }
   ],
   "api": {
-    "getStatus": { "method": "GET", "path": "/status" },
-    "runZone": { "method": "POST", "path": "/run" },
-    "stopZone": { "method": "POST", "path": "/stop" },
-    "command": { "method": "POST", "path": "/command" }
+    "getStatus": {
+      "method": "GET",
+      "path": "/status"
+    },
+    "runZone": {
+      "method": "POST",
+      "path": "/run"
+    },
+    "stopZone": {
+      "method": "POST",
+      "path": "/stop"
+    },
+    "command": {
+      "method": "POST",
+      "path": "/command"
+    }
   }
 }
