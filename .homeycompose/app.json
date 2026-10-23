@@ -1,6 +1,6 @@
 {
   "id": "no.opensprinkler",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "compatibility": ">=12.3.0",
   "sdk": 3,
   "platforms": [
@@ -20,7 +20,7 @@
   "permissions": [
     "homey:manager:api"
   ],
-  "brandColor": "#3B8EEA",
+  "brandColor": "#2AD4C8",
   "images": {
     "small": "/assets/images/small.png",
     "large": "/assets/images/large.png",
