@@ -66,17 +66,23 @@
   const NO = {
     zones: 'Soner', zones_n: 'soner', none_active: 'ingen aktive', active: 'aktiv', water_level: 'vannivå', rain_delay: 'Regnpause',
     run_time: 'Kjøretid for manuell start', drip: 'Drypp', spray: 'Spreder', valve: 'Ventil', watering: 'Vanner', left: 'igjen',
-    waiting: 'Venter', disabled: 'Deaktivert', last: 'sist', start: 'Start', stop: 'Stopp', in: 'i', controller_off: 'Kontrolleren er av', offline: 'Frakoblet',
+    waiting: 'Venter', manual: 'Manuell', run_once: 'Kjør én gang', disabled: 'Deaktivert', last: 'sist', start: 'Start', stop: 'Stopp', in: 'i', controller_off: 'Kontrolleren er av', offline: 'Frakoblet',
   };
+
+  const EN = {
+    manual: 'Manual', run_once: 'Run-once', zones: 'Zones', zones_n: 'zones', none_active: 'none active', active: 'active', water_level: 'water level', rain_delay: 'Rain delay', run_time: 'Run time for manual start', drip: 'Drip', spray: 'Sprinkler', valve: 'Valve', watering: 'Watering', left: 'left', waiting: 'Waiting', disabled: 'Disabled', last: 'last', start: 'Start', stop: 'Stop', in: 'for', controller_off: 'The controller is off', offline: 'Offline',
+  };
+  const FALLBACK = /^(nb|nn|no)/i.test(navigator.language || '') ? NO : EN;
 
   function onHomeyReady(Homey) {
     const settings = Homey.getSettings() || {};
     const ctrlId = settings.controller && settings.controller.id;
-    const t = k => { try { const v = Homey.__(`widget.${k}`); if (v && v !== `widget.${k}`) return v; } catch (e) { /* no i18n */ } return NO[k]; };
+    const t = k => { try { const v = Homey.__(`widget.${k}`); if (v && v !== `widget.${k}`) return v; } catch (e) { /* no i18n */ } return FALLBACK[k]; };
     const $ = id => document.getElementById(id);
     const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     const fmt = sec => { sec = Math.max(0, Math.round(sec)); return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; };
-    const num = (v, d) => Number(v).toLocaleString('nb-NO', { minimumFractionDigits: d, maximumFractionDigits: d });
+    const num = (v, d) => Number(v).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
+    const progName = p => (p === 'Manual' ? t('manual') : p === 'Run-once' ? t('run_once') : p);
     const litres = l => (l >= 1000 ? `${num(l / 1000, 2)} m³` : `${num(l, 0)} L`);
 
     // Selected run time, remembered per widget instance.
@@ -112,7 +118,7 @@
         if (z.running) {
           meta = `${t('watering')} · ${fmt(z.remaining - el)} ${t('left')}`;
         } else if (z.waiting) {
-          meta = `${t('waiting')}${z.program ? ` · ${esc(z.program)}` : ''}`;
+          meta = `${t('waiting')}${z.program ? ` · ${esc(progName(z.program))}` : ''}`;
         } else if (z.disabled) {
           meta = t('disabled');
         } else {

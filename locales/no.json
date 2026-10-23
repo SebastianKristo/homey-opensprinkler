@@ -75,6 +75,18 @@
     "none": "Ingen",
     "flow_now": "Vannflyt nå",
     "consumption": "Forbruk",
+    "h": "t",
+    "manual": "Manuell",
+    "run_once": "Kjør én gang"
+  },
+  "status": {
+    "off": "Av",
+    "drip": "Drypp",
+    "spray": "Spreder",
+    "disabled": "Deaktivert",
+    "waiting": "Venter",
+    "watering": "Vanner · __left__ igjen",
+    "run_once": "Kjør én gang",
     "h": "t"
   }
 }

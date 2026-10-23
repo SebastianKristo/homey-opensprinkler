@@ -77,10 +77,10 @@ class StationDevice extends Homey.Device {
     if (!z) return;
     if (!this.getAvailable()) await this.setAvailable();
     const parsed = parseZoneName(z.name, this.sid);
-    const typeLabel = this.getSetting('sprinkler_type') === 'spray' ? 'Spreder' : 'Drypp';
-    this._idleStatus = parsed.valve ? `Av · ${typeLabel} ${parsed.valve}` : `Av · ${typeLabel}`;
-    if (z.disabled) this._idleStatus = 'Deaktivert';
-    else if (z.waiting) this._idleStatus = 'Venter';
+    const typeLabel = this.homey.__(this.getSetting('sprinkler_type') === 'spray' ? 'status.spray' : 'status.drip');
+    this._idleStatus = `${this.homey.__('status.off')} · ${typeLabel}${parsed.valve ? ` ${parsed.valve}` : ''}`;
+    if (z.disabled) this._idleStatus = this.homey.__('status.disabled');
+    else if (z.waiting) this._idleStatus = this.homey.__('status.waiting');
     this._program = z.program;
     // Remember when the run ends so the countdown can tick between polls.
     this._endsAt = z.running ? Date.now() + z.remaining * 1000 : null;
@@ -98,8 +98,9 @@ class StationDevice extends Homey.Device {
     if (z.running !== wasRunning && this.homey.app.water) this.homey.app.water.update();
   }
 
-  static formatLeft(sec) {
-    if (sec >= 3600) return `${Math.floor(sec / 3600)} t ${Math.floor((sec % 3600) / 60)} min`;
+  _formatLeft(sec) {
+    const h = this.homey.__('status.h');
+    if (sec >= 3600) return `${Math.floor(sec / 3600)} ${h} ${Math.floor((sec % 3600) / 60)} min`;
     if (sec >= 60) return `${Math.ceil(sec / 60)} min`;
     return `${Math.max(0, Math.round(sec))} s`;
   }
@@ -109,8 +110,8 @@ class StationDevice extends Homey.Device {
     const left = this._endsAt ? Math.max(0, (this._endsAt - Date.now()) / 1000) : 0;
     let status = this._idleStatus || '';
     if (this._endsAt) {
-      status = `Vanner · ${StationDevice.formatLeft(left)} igjen`;
-      if (this._program && this._program !== 'Manual') status += ` (${this._program})`;
+      status = this.homey.__('status.watering', { left: this._formatLeft(left) });
+      if (this._program && this._program !== 'Manual') status += ` (${this._program === 'Run-once' ? this.homey.__('status.run_once') : this._program})`;
     }
     const remaining = Math.round((left / 60) * 10) / 10;
     if (this.getCapabilityValue('os_status') !== status) await this.setCapabilityValue('os_status', status);

@@ -75,6 +75,18 @@
     "none": "None",
     "flow_now": "Flow now",
     "consumption": "Consumption",
+    "h": "h",
+    "manual": "Manual",
+    "run_once": "Run-once"
+  },
+  "status": {
+    "off": "Off",
+    "drip": "Drip",
+    "spray": "Sprinkler",
+    "disabled": "Disabled",
+    "waiting": "Waiting",
+    "watering": "Watering · __left__ left",
+    "run_once": "Run-once",
     "h": "h"
   }
 }

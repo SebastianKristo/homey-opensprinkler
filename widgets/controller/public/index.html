@@ -71,14 +71,19 @@
     running_now: 'Kjører nå', none: 'Ingen', flow_now: 'Vannflyt nå', consumption: 'Forbruk', h: 't',
   };
 
+  const EN = {
+    connected: 'Connected', disabled: 'Disabled', offline: 'Offline', toggle: 'Turn controller on or off', delay_until: 'Rain delay until', left: 'left', cancel: 'Cancel', no_delay: 'No rain delay', pause24: 'Pause 24 h', water_level: 'water level', lower: 'Lower water level', raise: 'Raise water level', rain_sensor: 'Rain sensor', dry: 'Dry', wet: 'Wet', running_now: 'Running now', none: 'None', flow_now: 'Flow now', consumption: 'Consumption', h: 'h',
+  };
+  const FALLBACK = /^(nb|nn|no)/i.test(navigator.language || '') ? NO : EN;
+
   function onHomeyReady(Homey) {
     const settings = Homey.getSettings() || {};
     const ctrlId = settings.controller && settings.controller.id;
-    const t = k => { try { const v = Homey.__(`widget.${k}`); if (v && v !== `widget.${k}`) return v; } catch (e) { /* no i18n */ } return NO[k]; };
+    const t = k => { try { const v = Homey.__(`widget.${k}`); if (v && v !== `widget.${k}`) return v; } catch (e) { /* no i18n */ } return FALLBACK[k]; };
     const root = document.getElementById('root');
     const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     const fmt = sec => { sec = Math.max(0, Math.round(sec)); return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; };
-    const num = (v, d) => Number(v).toLocaleString('nb-NO', { minimumFractionDigits: d, maximumFractionDigits: d });
+    const num = (v, d) => Number(v).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
     let state = null; let fetchedAt = 0; let busy = false; let lastHeight = 0; let error = null;
 
     function render() {
