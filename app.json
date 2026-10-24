@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "no.kristo.opensprinkler",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "compatibility": ">=12.3.0",
   "sdk": 3,
   "platforms": [
@@ -51,6 +51,26 @@
     "testValve": {
       "method": "POST",
       "path": "/valve/test"
+    },
+    "getControllers": {
+      "method": "GET",
+      "path": "/controllers"
+    },
+    "getPrograms": {
+      "method": "GET",
+      "path": "/programs"
+    },
+    "saveProgram": {
+      "method": "POST",
+      "path": "/programs/save"
+    },
+    "deleteProgram": {
+      "method": "POST",
+      "path": "/programs/delete"
+    },
+    "runProgram": {
+      "method": "POST",
+      "path": "/programs/run"
     }
   },
   "tags": {
@@ -337,7 +357,9 @@
         "os_water_level",
         "os_rain_delay",
         "os_rain_delay_end",
-        "alarm_water"
+        "alarm_water",
+        "os_programs_active",
+        "os_programs"
       ],
       "capabilitiesOptions": {
         "onoff": {
@@ -688,6 +710,29 @@
       "uiComponent": "sensor",
       "icon": "/assets/water.svg",
       "insights": true
+    },
+    "os_programs": {
+      "type": "string",
+      "title": {
+        "en": "Programs",
+        "no": "Programmer"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/timer.svg"
+    },
+    "os_programs_active": {
+      "type": "number",
+      "title": {
+        "en": "Active programs",
+        "no": "Aktive programmer"
+      },
+      "decimals": 0,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/timer.svg"
     },
     "os_rain_delay": {
       "type": "boolean",

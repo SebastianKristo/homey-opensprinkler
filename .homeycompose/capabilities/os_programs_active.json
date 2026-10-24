@@ -1,0 +1,1 @@
+{ "type": "number", "title": { "en": "Active programs", "no": "Aktive programmer" }, "decimals": 0, "getable": true, "setable": false, "uiComponent": "sensor", "icon": "/assets/timer.svg" }

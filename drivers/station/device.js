@@ -43,7 +43,9 @@ class StationDevice extends Homey.Device {
     await this.setStoreValue('water_total', total);
     await this.setStoreValue('water_last_run', last);
     await this.setCapabilityValue('meter_water', Math.round(total) / 1000);
-    await this.setCapabilityValue('os_last_run', Math.round(last));
+    // While watering the sensor keeps showing the previous run; late meter reports
+    // during the grace period after a stop still belong to the run that just ended.
+    if (this.getCapabilityValue('onoff') !== true) await this.setCapabilityValue('os_last_run', Math.round(last));
   }
 
   async resetWater() {
@@ -91,9 +93,10 @@ class StationDevice extends Homey.Device {
     this.homey.clearInterval(this._ticker);
     if (z.running) this._ticker = this.homey.setInterval(() => this._tick().catch(this.error), 5000);
     if (z.running && !wasRunning) {
-      // New run: restart the per-run consumption counter.
+      // New run: restart the per-run counter. The sensor keeps the previous run until this one ends.
       await this.setStoreValue('water_last_run', 0);
-      await this.setCapabilityValue('os_last_run', 0).catch(this.error);
+    } else if (!z.running && wasRunning) {
+      await this.setCapabilityValue('os_last_run', Math.round(this.getStoreValue('water_last_run') || 0)).catch(this.error);
     }
     if (z.running !== wasRunning && this.homey.app.water) this.homey.app.water.update();
   }

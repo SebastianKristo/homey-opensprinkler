@@ -7,6 +7,17 @@
     td, th { padding: 6px 4px; text-align: left; border-bottom: 1px solid #eee; }
     td.n, th.n { text-align: right; }
     .run { color: #1e88e5; font-weight: 600; }
+    .prog-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #eee; }
+    .prog-row .info { flex: 1; min-width: 0; }
+    .prog-row .pn { font-weight: 600; }
+    .prog-row .ps { font-size: 13px; color: #888; }
+    .prog-row button { padding: 4px 10px; font-size: 13px; }
+    .days { display: flex; flex-wrap: wrap; gap: 6px 12px; }
+    .days label { display: flex; align-items: center; gap: 4px; font-size: 14px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .dur { display: grid; grid-template-columns: 1fr 90px; gap: 6px 8px; align-items: center; font-size: 14px; }
+    .hidden { display: none !important; }
+    .warn { color: #c62828; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -70,6 +81,65 @@
     <table id="zones"></table>
     <p id="unassigned"></p>
     <button class="homey-button-secondary-full" id="reset" data-i18n="settings.reset"></button>
+  </fieldset>
+
+  <fieldset class="homey-form-fieldset">
+    <legend class="homey-form-legend" data-i18n="settings.p_title"></legend>
+    <div class="homey-form-group" id="pCtrlWrap">
+      <label class="homey-form-label" for="pCtrl" data-i18n="settings.p_controller"></label>
+      <select class="homey-form-select" id="pCtrl"></select>
+    </div>
+    <div id="pList"></div>
+    <button class="homey-button-secondary-full" id="pNew" data-i18n="settings.p_new"></button>
+  </fieldset>
+
+  <fieldset class="homey-form-fieldset hidden" id="pEdit">
+    <legend class="homey-form-legend" id="pEditTitle"></legend>
+    <div class="homey-form-group">
+      <label class="homey-form-label" for="pName" data-i18n="settings.p_name"></label>
+      <input class="homey-form-input" id="pName" maxlength="32" />
+    </div>
+    <label class="homey-form-checkbox"><input class="homey-form-checkbox-input" type="checkbox" id="pEnabled" /><span class="homey-form-checkbox-checkmark"></span><span class="homey-form-checkbox-text" data-i18n="settings.p_enabled"></span></label>
+    <label class="homey-form-checkbox"><input class="homey-form-checkbox-input" type="checkbox" id="pWeather" /><span class="homey-form-checkbox-checkmark"></span><span class="homey-form-checkbox-text" data-i18n="settings.p_weather"></span></label>
+    <div class="homey-form-group">
+      <label class="homey-form-label" for="pType" data-i18n="settings.p_schedule"></label>
+      <select class="homey-form-select" id="pType">
+        <option value="weekly" data-i18n="settings.p_weekly"></option>
+        <option value="interval" data-i18n="settings.p_interval"></option>
+      </select>
+      <p class="warn hidden" id="pOther" data-i18n="settings.p_other"></p>
+    </div>
+    <div class="homey-form-group" id="pWeeklyWrap"><div class="days" id="pDays"></div></div>
+    <div class="homey-form-group grid2 hidden" id="pIntervalWrap">
+      <div><label class="homey-form-label" for="pEvery" data-i18n="settings.p_every"></label><input class="homey-form-input" id="pEvery" type="number" min="1" max="128" /></div>
+      <div><label class="homey-form-label" for="pStartIn" data-i18n="settings.p_start_in"></label><input class="homey-form-input" id="pStartIn" type="number" min="0" max="127" /></div>
+    </div>
+    <div class="homey-form-group">
+      <label class="homey-form-label" for="pStartType" data-i18n="settings.p_starts"></label>
+      <select class="homey-form-select" id="pStartType">
+        <option value="fixed" data-i18n="settings.p_fixed"></option>
+        <option value="repeat" data-i18n="settings.p_repeat"></option>
+      </select>
+      <p class="homey-form-hint" data-i18n="settings.p_time_hint"></p>
+    </div>
+    <div class="homey-form-group grid2" id="pFixedWrap">
+      <input class="homey-form-input" id="pS0" placeholder="06:00" /><input class="homey-form-input" id="pS1" />
+      <input class="homey-form-input" id="pS2" /><input class="homey-form-input" id="pS3" />
+    </div>
+    <div class="homey-form-group hidden" id="pRepeatWrap">
+      <input class="homey-form-input" id="pFirst" placeholder="06:00" />
+      <div class="grid2" style="margin-top:8px">
+        <div><label class="homey-form-label" for="pRepeat" data-i18n="settings.p_repeat_n"></label><input class="homey-form-input" id="pRepeat" type="number" min="0" max="100" /></div>
+        <div><label class="homey-form-label" for="pRepeatEvery" data-i18n="settings.p_repeat_every"></label><input class="homey-form-input" id="pRepeatEvery" type="number" min="1" max="1440" /></div>
+      </div>
+    </div>
+    <div class="homey-form-group">
+      <label class="homey-form-label" data-i18n="settings.p_durations"></label>
+      <div class="dur" id="pDur"></div>
+    </div>
+    <button class="homey-button-primary-full" id="pSave" data-i18n="settings.save"></button>
+    <button class="homey-button-secondary-full" id="pCancel" data-i18n="settings.p_cancel"></button>
+    <button class="homey-button-danger-full" id="pDelete" data-i18n="settings.p_delete"></button>
   </fieldset>
 
   <script type="text/javascript">
@@ -161,6 +231,183 @@
       await Homey.api('POST', '/reset');
       loadStatus();
     });
+
+
+    // ---------- Programs ----------
+    const P = { ctrl: null, data: null, editing: null };
+    const pad = n => String(n).padStart(2, '0');
+    const fmtStart = st => {
+      if (!st) return '';
+      if (st.type === 'time') return `${pad(Math.floor(st.minutes / 60))}:${pad(st.minutes % 60)}`;
+      return `${t(`p_${st.type}`)}${st.offset ? (st.offset > 0 ? '+' : '') + st.offset : ''}`;
+    };
+    const parseStart = txt => {
+      txt = String(txt || '').trim().toLowerCase();
+      if (!txt) return null;
+      let m = /^(\d{1,2})[:.](\d{2})$/.exec(txt);
+      if (m && +m[1] < 24 && +m[2] < 60) return { type: 'time', minutes: +m[1] * 60 + +m[2] };
+      m = /^(sunrise|sunset|soloppgang|solnedgang)\s*([+-]\s*\d+)?$/.exec(txt);
+      if (m) return { type: /^(sunrise|soloppgang)$/.test(m[1]) ? 'sunrise' : 'sunset', offset: m[2] ? parseInt(m[2].replace(/\s/g, ''), 10) : 0 };
+      throw new Error(`${t('p_bad_time')}: ${txt}`);
+    };
+    const dayNames = () => t('p_daynames').split(',');
+    const zonesFor = () => P.data.zones.filter(z => !z.isMaster);
+
+    function summary(p) {
+      let when;
+      if (p.scheduleType === 'interval') when = t('p_every_n').replace('{n}', p.interval);
+      else if (p.scheduleType === 'weekly') when = p.weekdays.length === 7 ? t('p_daily') : p.weekdays.map(d => dayNames()[d]).join(' ') || '–';
+      else when = t('p_other_short');
+      const starts = p.fixedStarts ? p.starts.filter(Boolean).map(fmtStart).join(', ')
+        : `${fmtStart(p.starts[0])}${p.repeat ? ` ×${p.repeat + 1}/${p.repeatInterval} min` : ''}`;
+      const total = Math.round(p.durations.reduce((a, b) => a + b, 0) / 60);
+      return `${when} · ${starts || '–'} · ${total} min`;
+    }
+
+    function renderPrograms() {
+      const list = $('pList'); list.innerHTML = '';
+      if (!P.data.programs.length) { list.textContent = t('p_none'); return; }
+      P.data.programs.forEach(p => {
+        const row = document.createElement('div'); row.className = 'prog-row';
+        row.innerHTML = '<input type="checkbox" /><div class="info"><div class="pn"></div><div class="ps"></div></div><button class="homey-button-secondary-small run"></button><button class="homey-button-primary-small edit"></button>';
+        const cb = row.querySelector('input'); cb.checked = p.enabled; cb.title = t('p_enabled');
+        row.querySelector('.pn').textContent = p.name;
+        row.querySelector('.ps').textContent = summary(p);
+        row.querySelector('.run').textContent = t('p_run');
+        row.querySelector('.edit').textContent = t('p_edit');
+        cb.onchange = () => saveProgram({ ...p, enabled: cb.checked, startInDays: startIn(p) });
+        row.querySelector('.run').onclick = () => Homey.confirm(`${t('p_run')} «${p.name}»?`, null, async (e, ok) => {
+          if (!ok) return;
+          try { P.data = await Homey.api('POST', '/programs/run', { controller: P.ctrl, pid: p.pid }); Homey.alert(t('p_started')); } catch (err) { Homey.alert(err.message || err); }
+        });
+        row.querySelector('.edit').onclick = () => openEditor(p);
+        list.appendChild(row);
+      });
+    }
+
+    // Days until an interval program next runs, from its stored remainder.
+    function startIn(p) {
+      if (p.scheduleType !== 'interval') return 0;
+      const today = Math.floor(P.data.now / 86400);
+      return ((p.remainder - (today % p.interval)) + p.interval) % p.interval;
+    }
+
+    function openEditor(p) {
+      const isNew = !p;
+      p = p || { pid: null, name: '', enabled: true, useWeather: true, scheduleType: 'weekly', weekdays: [0, 1, 2, 3, 4, 5, 6],
+        interval: 2, fixedStarts: true, starts: [{ type: 'time', minutes: 360 }], repeat: 0, repeatInterval: 60, durations: [], raw: null };
+      P.editing = p;
+      $('pEditTitle').textContent = isNew ? t('p_new') : `${t('p_edit')}: ${p.name}`;
+      $('pName').value = p.name;
+      $('pEnabled').checked = p.enabled;
+      $('pWeather').checked = p.useWeather;
+      $('pType').value = p.scheduleType === 'interval' ? 'interval' : 'weekly';
+      $('pOther').classList.toggle('hidden', p.scheduleType !== 'other');
+      $('pDays').innerHTML = '';
+      dayNames().forEach((n, d) => {
+        const l = document.createElement('label');
+        l.innerHTML = `<input type="checkbox" data-day="${d}" ${p.weekdays.includes(d) ? 'checked' : ''}/> ${n}`;
+        $('pDays').appendChild(l);
+      });
+      $('pEvery').value = p.interval || 2;
+      $('pStartIn').value = startIn(p);
+      $('pStartType').value = p.fixedStarts ? 'fixed' : 'repeat';
+      [0, 1, 2, 3].forEach(i => { $(`pS${i}`).value = p.fixedStarts ? fmtStart(p.starts[i]) : ''; });
+      $('pFirst').value = fmtStart(p.starts[0]);
+      $('pRepeat').value = p.repeat || 0;
+      $('pRepeatEvery').value = p.repeatInterval || 60;
+      $('pDur').innerHTML = '';
+      zonesFor().forEach(z => {
+        const name = document.createElement('span'); name.textContent = z.name + (z.disabled ? ` (${t('p_disabled')})` : '');
+        const inp = document.createElement('input'); inp.className = 'homey-form-input'; inp.type = 'number'; inp.min = 0; inp.max = 720; inp.step = 'any';
+        inp.dataset.sid = z.sid; inp.placeholder = 'min';
+        const sec = p.durations[z.sid] || 0; inp.value = sec ? Math.round((sec / 60) * 10) / 10 : '';
+        $('pDur').appendChild(name); $('pDur').appendChild(inp);
+      });
+      $('pDelete').classList.toggle('hidden', isNew);
+      toggleEditor(); $('pEdit').classList.remove('hidden');
+      $('pEdit').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function toggleEditor() {
+      $('pWeeklyWrap').classList.toggle('hidden', $('pType').value !== 'weekly');
+      $('pIntervalWrap').classList.toggle('hidden', $('pType').value !== 'interval');
+      $('pFixedWrap').classList.toggle('hidden', $('pStartType').value !== 'fixed');
+      $('pRepeatWrap').classList.toggle('hidden', $('pStartType').value !== 'repeat');
+    }
+    $('pType').onchange = toggleEditor; $('pStartType').onchange = toggleEditor;
+
+    function readEditor() {
+      const p = P.editing;
+      const durations = (p.durations || []).slice();
+      $('pDur').querySelectorAll('input').forEach(i => { durations[+i.dataset.sid] = Math.round((parseFloat(i.value) || 0) * 60); });
+      for (let i = 0; i < durations.length; i++) if (durations[i] == null) durations[i] = 0;
+      if (!durations.some(d => d > 0)) throw new Error(t('p_need_duration'));
+      const fixed = $('pStartType').value === 'fixed';
+      const starts = fixed ? [0, 1, 2, 3].map(i => parseStart($(`pS${i}`).value)) : [parseStart($('pFirst').value)];
+      if (!starts.some(Boolean)) throw new Error(t('p_need_start'));
+      const weekdays = [...$('pDays').querySelectorAll('input:checked')].map(i => +i.dataset.day);
+      if ($('pType').value === 'weekly' && !weekdays.length) throw new Error(t('p_need_day'));
+      return {
+        ...p,
+        name: $('pName').value.trim() || 'Program',
+        enabled: $('pEnabled').checked,
+        useWeather: $('pWeather').checked,
+        scheduleType: $('pType').value,
+        weekdays,
+        interval: +$('pEvery').value || 1,
+        startInDays: +$('pStartIn').value || 0,
+        fixedStarts: fixed,
+        starts,
+        repeat: +$('pRepeat').value || 0,
+        repeatInterval: +$('pRepeatEvery').value || 60,
+        durations,
+      };
+    }
+
+    async function saveProgram(program) {
+      try {
+        P.data = await Homey.api('POST', '/programs/save', { controller: P.ctrl, program });
+        renderPrograms();
+        return true;
+      } catch (err) { Homey.alert(err.message || err); return false; }
+    }
+
+    $('pSave').onclick = async () => {
+      let program;
+      try { program = readEditor(); } catch (err) { return Homey.alert(err.message); }
+      if (await saveProgram(program)) { $('pEdit').classList.add('hidden'); Homey.alert(t('saved')); }
+    };
+    $('pCancel').onclick = () => $('pEdit').classList.add('hidden');
+    $('pDelete').onclick = () => Homey.confirm(`${t('p_delete')} «${P.editing.name}»?`, 'warning', async (e, ok) => {
+      if (!ok) return;
+      try {
+        P.data = await Homey.api('POST', '/programs/delete', { controller: P.ctrl, pid: P.editing.pid });
+        $('pEdit').classList.add('hidden'); renderPrograms();
+      } catch (err) { Homey.alert(err.message || err); }
+    });
+    $('pNew').onclick = () => openEditor(null);
+
+    async function loadPrograms() {
+      try {
+        P.data = await Homey.api('GET', `/programs?controller=${encodeURIComponent(P.ctrl || '')}`);
+        P.ctrl = P.data.controller;
+        renderPrograms();
+      } catch (err) { $('pList').textContent = err.message || String(err); }
+    }
+
+    (async () => {
+      try {
+        const ctrls = await Homey.api('GET', '/controllers');
+        ctrls.forEach(c => opt($('pCtrl'), c.id, c.name));
+        $('pCtrlWrap').classList.toggle('hidden', ctrls.length < 2);
+        $('pNew').classList.toggle('hidden', !ctrls.length);
+        if (!ctrls.length) { $('pList').textContent = t('p_no_controller'); return; }
+        P.ctrl = ctrls[0].id;
+        $('pCtrl').onchange = () => { P.ctrl = $('pCtrl').value; $('pEdit').classList.add('hidden'); loadPrograms(); };
+        loadPrograms();
+      } catch (err) { $('pList').textContent = err.message || String(err); }
+    })();
 
     init();
     setInterval(loadStatus, 5000);

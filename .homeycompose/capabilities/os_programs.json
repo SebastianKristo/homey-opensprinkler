@@ -1,0 +1,1 @@
+{ "type": "string", "title": { "en": "Programs", "no": "Programmer" }, "getable": true, "setable": false, "uiComponent": "sensor", "icon": "/assets/timer.svg" }

@@ -3,12 +3,15 @@
 const Homey = require('homey');
 const OpenSprinklerApi = require('../../lib/OpenSprinklerApi');
 
-module.exports = class ControllerDevice extends Homey.Device {
+class ControllerDevice extends Homey.Device {
 
   async onInit() {
     this.state = null;
     this.runTotals = {};
     this.setMaxListeners(100);
+    for (const cap of ['os_programs_active', 'os_programs']) {
+      if (!this.hasCapability(cap)) await this.addCapability(cap).catch(this.error);
+    }
     this.reconnect();
 
     this.registerCapabilityListener('onoff', async value => {
@@ -80,7 +83,25 @@ module.exports = class ControllerDevice extends Homey.Device {
       set('os_rain_delay', s.rainDelay),
       set('os_rain_delay_end', end),
       set('alarm_water', s.sensor1),
+      set('os_programs_active', s.programs.filter(p => p.enabled).length),
+      set('os_programs', ControllerDevice.programSummary(s.programs, this.homey)),
     ]);
+  }
+
+  /** "Morgen 06:00 · Kveld (av)" – shown on the device as a quick overview. */
+  static programSummary(programs, homey) {
+    if (!programs.length) return homey.__('programs.none');
+    const fmt = st => {
+      if (!st) return '';
+      if (st.type === 'time') return `${String(Math.floor(st.minutes / 60)).padStart(2, '0')}:${String(st.minutes % 60).padStart(2, '0')}`;
+      const label = homey.__(`programs.${st.type}`);
+      return st.offset ? `${label}${st.offset > 0 ? '+' : ''}${st.offset}` : label;
+    };
+    return programs.map(p => {
+      if (!p.enabled) return `${p.name} (${homey.__('programs.off')})`;
+      const first = p.starts.find(Boolean);
+      return first ? `${p.name} ${fmt(first)}` : p.name;
+    }).join(' · ');
   }
 
   async onSettings({ newSettings, changedKeys }) {
@@ -99,4 +120,6 @@ module.exports = class ControllerDevice extends Homey.Device {
     this.homey.clearTimeout(this._timer);
   }
 
-};
+}
+
+module.exports = ControllerDevice;

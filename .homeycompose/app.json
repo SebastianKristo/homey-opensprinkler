@@ -1,6 +1,6 @@
 {
   "id": "no.kristo.opensprinkler",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "compatibility": ">=12.3.0",
   "sdk": 3,
   "platforms": [
@@ -50,6 +50,26 @@
     "testValve": {
       "method": "POST",
       "path": "/valve/test"
+    },
+    "getControllers": {
+      "method": "GET",
+      "path": "/controllers"
+    },
+    "getPrograms": {
+      "method": "GET",
+      "path": "/programs"
+    },
+    "saveProgram": {
+      "method": "POST",
+      "path": "/programs/save"
+    },
+    "deleteProgram": {
+      "method": "POST",
+      "path": "/programs/delete"
+    },
+    "runProgram": {
+      "method": "POST",
+      "path": "/programs/run"
     }
   },
   "tags": {

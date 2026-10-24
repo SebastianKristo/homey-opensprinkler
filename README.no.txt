@@ -6,6 +6,8 @@ Funksjoner:
 - Slå kontrolleren av eller på, sett regnpause og juster vannivået
 - Regnsensor og aktive soner vises på kontroller-enheten
 - Ikon for drypp eller spreder på hver sone
+- Oversikt over programmer på kontroller-enheten, og opprett, rediger, slett og kjør OpenSprinkler-programmer fra appinnstillingene
+- Vannforbruk for hver sone ved siste kjøring
 - Flow-kort: kjør eller stopp en sone, stopp alle soner, kjør et program, aktiver eller deaktiver et program, sett regnpause og vannivå
 - To widgets for dashbordet: én for kontrolleren og én for sonene, med nedtelling
 - Vannmåling: velg en vannmåler i appinnstillingene (for eksempel en Sonoff Zigbee-vannmåler). Vannflyt og forbruk tilordnes sonen som går, så hver sone får egne sensorer for vannflyt og forbruk.

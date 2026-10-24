@@ -1,23 +1,85 @@
 {
-  "name": { "en": "OpenSprinkler controller", "no": "OpenSprinkler-kontroller" },
-  "class": "sprinkler",
-  "capabilities": ["onoff", "os_running", "os_water_level", "os_rain_delay", "os_rain_delay_end", "alarm_water"],
-  "capabilitiesOptions": {
-    "onoff": { "title": { "en": "Controller enabled", "no": "Kontroller aktivert" } },
-    "alarm_water": { "title": { "en": "Rain sensor", "no": "Regnsensor" } }
+  "name": {
+    "en": "OpenSprinkler controller",
+    "no": "OpenSprinkler-kontroller"
   },
-  "platforms": ["local"],
-  "connectivity": ["lan"],
-  "images": { "small": "{{driverAssetsPath}}/images/small.png", "large": "{{driverAssetsPath}}/images/large.png" },
+  "class": "sprinkler",
+  "capabilities": [
+    "onoff",
+    "os_running",
+    "os_water_level",
+    "os_rain_delay",
+    "os_rain_delay_end",
+    "alarm_water",
+    "os_programs_active",
+    "os_programs"
+  ],
+  "capabilitiesOptions": {
+    "onoff": {
+      "title": {
+        "en": "Controller enabled",
+        "no": "Kontroller aktivert"
+      }
+    },
+    "alarm_water": {
+      "title": {
+        "en": "Rain sensor",
+        "no": "Regnsensor"
+      }
+    }
+  },
+  "platforms": [
+    "local"
+  ],
+  "connectivity": [
+    "lan"
+  ],
+  "images": {
+    "small": "{{driverAssetsPath}}/images/small.png",
+    "large": "{{driverAssetsPath}}/images/large.png"
+  },
   "pair": [
-    { "id": "start" }
+    {
+      "id": "start"
+    }
   ],
   "repair": [
-    { "id": "start" }
+    {
+      "id": "start"
+    }
   ],
   "settings": [
-    { "id": "host", "type": "text", "label": { "en": "Host / IP", "no": "Vert / IP" }, "value": "" },
-    { "id": "password", "type": "password", "label": { "en": "Password (leave empty to keep)", "no": "Passord (tomt = behold)" }, "value": "" },
-    { "id": "poll_interval", "type": "number", "label": { "en": "Poll interval", "no": "Oppdateringsintervall" }, "units": { "en": "s" }, "value": 10, "min": 3, "max": 300 }
+    {
+      "id": "host",
+      "type": "text",
+      "label": {
+        "en": "Host / IP",
+        "no": "Vert / IP"
+      },
+      "value": ""
+    },
+    {
+      "id": "password",
+      "type": "password",
+      "label": {
+        "en": "Password (leave empty to keep)",
+        "no": "Passord (tomt = behold)"
+      },
+      "value": ""
+    },
+    {
+      "id": "poll_interval",
+      "type": "number",
+      "label": {
+        "en": "Poll interval",
+        "no": "Oppdateringsintervall"
+      },
+      "units": {
+        "en": "s"
+      },
+      "value": 10,
+      "min": 3,
+      "max": 300
+    }
   ]
 }
