@@ -1,146 +1,243 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
   <style>
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    td, th { padding: 6px 4px; text-align: left; border-bottom: 1px solid #eee; }
-    td.n, th.n { text-align: right; }
-    .run { color: #1e88e5; font-weight: 600; }
-    .prog-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #eee; }
-    .prog-row .info { flex: 1; min-width: 0; }
-    .prog-row .pn { font-weight: 600; }
-    .prog-row .ps { font-size: 13px; color: #888; }
-    .prog-row button { padding: 4px 10px; font-size: 13px; }
-    .days { display: flex; flex-wrap: wrap; gap: 6px 12px; }
-    .days label { display: flex; align-items: center; gap: 4px; font-size: 14px; }
-    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .dur { display: grid; grid-template-columns: 1fr 90px; gap: 6px 8px; align-items: center; font-size: 14px; }
+    :root {
+      --bg: #F5F7FA; --card: #FFFFFF; --card-2: #F0F3F7; --fg: #15181D; --muted: #6B7480; --line: #E3E7EC;
+      --blue: #3B8EEA; --blue-soft: rgba(59,142,234,.12); --blue-text: #2A78D2;
+      --green: #2FB073; --orange: #E58A2E; --orange-soft: rgba(255,180,102,.18); --red: #E0524F; --red-soft: rgba(224,82,79,.1);
+      --shadow: 0 1px 2px rgba(16,24,40,.04), 0 4px 16px rgba(16,24,40,.06);
+      --radius: 20px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0B0D10; --card: #16191E; --card-2: #1F242B; --fg: #F2F4F7; --muted: #9AA3AE; --line: #262A31;
+        --blue: #5AB0FF; --blue-soft: rgba(90,176,255,.14); --blue-text: #8CCBFF;
+        --orange: #FFB466; --orange-soft: rgba(255,180,102,.14); --red-soft: rgba(240,96,93,.14);
+        --shadow: none;
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { background: var(--bg); }
+    body { margin: 0; padding: 0 16px 40px; font-family: Inter, -apple-system, system-ui, "Segoe UI", Roboto, sans-serif; color: var(--fg); -webkit-font-smoothing: antialiased; }
+    button, input, select { font-family: inherit; color: inherit; }
     .hidden { display: none !important; }
-    .warn { color: #c62828; font-size: 13px; }
+
+    /* Header */
+    .hero { display: flex; align-items: center; gap: 14px; padding: 20px 0 16px; }
+    .hero-icon { width: 52px; height: 52px; border-radius: 16px; background: linear-gradient(145deg, #5AB0FF, #2A78D2); display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 6px 18px rgba(59,142,234,.35); flex-shrink: 0; }
+    .hero h1 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -.02em; }
+    .hero p { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+
+    /* Tabs */
+    .tabs { position: sticky; top: 0; z-index: 5; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 4px; margin: 0 0 16px; background: var(--card-2); border-radius: 14px; }
+    .tabs button { display: flex; flex-direction: column; align-items: center; gap: 3px; height: 54px; justify-content: center; border: 0; border-radius: 11px; background: transparent; color: var(--muted); font-size: 12px; font-weight: 600; cursor: pointer; transition: background .15s, color .15s; }
+    .tabs button[aria-selected="true"] { background: var(--card); color: var(--fg); box-shadow: var(--shadow); }
+    .tabs svg { width: 20px; height: 20px; }
+
+    /* Cards */
+    .card { background: var(--card); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; box-shadow: var(--shadow); }
+    .card-h { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    .card-h h2 { margin: 0; font-size: 17px; font-weight: 650; letter-spacing: -.01em; }
+    .card-h .sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .intro { font-size: 14px; color: var(--muted); line-height: 1.45; margin: -4px 0 14px; }
+
+    /* Form */
+    .field { margin-bottom: 14px; }
+    .field > label, .grid2 label, .lbl { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+    .input, select.input { width: 100%; height: 44px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--card-2); font-size: 15px; outline: none; transition: border-color .15s, box-shadow .15s; -webkit-appearance: none; appearance: none; }
+    select.input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239AA3AE' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+    .input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft); }
+    .hint { font-size: 12px; color: var(--muted); margin: 6px 0 0; line-height: 1.4; }
+    .warn { font-size: 13px; color: var(--orange); background: var(--orange-soft); border-radius: 10px; padding: 8px 10px; margin: 8px 0 0; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .grid4 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    /* Switch rows */
+    .row-sw { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); font-size: 15px; }
+    .row-sw:first-of-type { border-top: 0; }
+    .sw { position: relative; width: 50px; height: 30px; flex-shrink: 0; -webkit-appearance: none; appearance: none; margin: 0; border-radius: 15px; background: var(--line); cursor: pointer; transition: background .2s; }
+    .sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 12px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: transform .2s; }
+    .sw:checked { background: var(--blue); }
+    .sw:checked::after { transform: translateX(20px); }
+
+    /* Buttons */
+    .btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 48px; border: 0; border-radius: 14px; font-size: 15px; font-weight: 650; cursor: pointer; transition: transform .08s, opacity .15s; margin-top: 10px; }
+    .btn:active { transform: scale(.98); }
+    .btn.primary { background: var(--blue); color: #fff; }
+    .btn.ghost { background: var(--card-2); color: var(--fg); }
+    .btn.danger { background: var(--red-soft); color: var(--red); }
+    .chip { height: 34px; padding: 0 14px; border: 0; border-radius: 17px; font-size: 13px; font-weight: 650; cursor: pointer; background: var(--card-2); color: var(--fg); flex-shrink: 0; }
+    .chip.blue { background: var(--blue-soft); color: var(--blue-text); }
+
+    /* Overview */
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stat { background: var(--card-2); border-radius: 16px; padding: 14px; }
+    .stat .k { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .stat .v { font-size: 24px; font-weight: 700; letter-spacing: -.02em; margin-top: 6px; }
+    .stat .v small { font-size: 14px; font-weight: 600; color: var(--muted); margin-left: 2px; }
+    .stat.on { background: var(--blue-soft); }
+    .stat.on .k { color: var(--blue-text); }
+    .status { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+    .dot { width: 8px; height: 8px; border-radius: 4px; background: var(--muted); }
+    .badge { display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 13px; font-size: 12px; font-weight: 650; background: var(--orange-soft); color: var(--orange); }
+
+    /* Zone water table */
+    .zt { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .zt th { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; text-align: left; padding: 0 0 8px; }
+    .zt td { padding: 10px 0; border-top: 1px solid var(--line); }
+    .zt td.n, .zt th.n { text-align: right; font-variant-numeric: tabular-nums; padding-left: 12px; white-space: nowrap; }
+    .zt td:first-child { overflow: hidden; text-overflow: ellipsis; }
+    .zt .run { color: var(--blue-text); font-weight: 650; }
+    .live { display: flex; align-items: baseline; gap: 6px; font-size: 28px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 4px; }
+    .live small { font-size: 14px; color: var(--muted); font-weight: 600; }
+    #unassigned { font-size: 13px; color: var(--muted); margin: 12px 0 0; }
+
+    /* Programs */
+    .prog-row { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-top: 1px solid var(--line); }
+    .prog-row:first-child { border-top: 0; padding-top: 0; }
+    .prog-row .info { flex: 1; min-width: 0; cursor: pointer; }
+    .prog-row .pn { font-size: 15px; font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .prog-row .ps { font-size: 13px; color: var(--muted); margin-top: 2px; line-height: 1.35; }
+    .prog-row.off .pn { color: var(--muted); }
+    .empty { text-align: center; color: var(--muted); font-size: 14px; padding: 18px 0 6px; }
+    .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+    .days label { position: relative; }
+    .days input { position: absolute; opacity: 0; pointer-events: none; }
+    .days span { display: flex; align-items: center; justify-content: center; height: 40px; border-radius: 12px; background: var(--card-2); font-size: 13px; font-weight: 650; color: var(--muted); cursor: pointer; transition: background .15s, color .15s; }
+    .days input:checked + span { background: var(--blue); color: #fff; }
+    .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: var(--card-2); border-radius: 12px; }
+    .seg button { height: 36px; border: 0; border-radius: 9px; background: transparent; font-size: 13px; font-weight: 650; color: var(--muted); cursor: pointer; }
+    .seg button[aria-pressed="true"] { background: var(--card); color: var(--fg); box-shadow: var(--shadow); }
+    .dur { display: flex; flex-direction: column; gap: 8px; }
+    .dur-row { display: flex; align-items: center; gap: 10px; }
+    .dur-row span { flex: 1; font-size: 14px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dur-row .input { width: 96px; text-align: right; }
+    .sheet-h { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+    .sheet-h h2 { flex: 1; margin: 0; font-size: 18px; font-weight: 700; }
+    .back { width: 36px; height: 36px; border-radius: 18px; border: 0; background: var(--card-2); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+    /* Toast */
+    .toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); opacity: 0; background: #15181D; color: #fff; padding: 12px 18px; border-radius: 14px; font-size: 14px; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,.25); transition: opacity .2s, transform .2s; pointer-events: none; z-index: 20; max-width: calc(100% - 32px); }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
   </style>
 </head>
 <body>
-  <header class="homey-header">
-    <h1 class="homey-title" data-i18n="settings.title"></h1>
-    <p class="homey-subtitle" data-i18n="settings.intro"></p>
-  </header>
+  <div class="hero">
+    <div class="hero-icon"><svg width="26" height="26" viewBox="0 0 64 64" fill="currentColor"><path d="M32 6c9 10.6 16 19.4 16 28.6a16 16 0 0 1-32 0C16 25.4 23 16.6 32 6z"/><rect x="14" y="56" width="36" height="4" rx="2"/></svg></div>
+    <div><h1>OpenSprinkler</h1><p data-i18n="settings.tagline"></p></div>
+  </div>
 
-  <fieldset class="homey-form-fieldset">
-    <legend class="homey-form-legend" data-i18n="settings.meter"></legend>
-    <div class="homey-form-group">
-      <label class="homey-form-label" for="device" data-i18n="settings.device"></label>
-      <select class="homey-form-select" id="device"></select>
-    </div>
-    <div class="homey-form-group">
-      <label class="homey-form-label" for="flow" data-i18n="settings.flow"></label>
-      <select class="homey-form-select" id="flow"></select>
-    </div>
-    <div class="homey-form-group">
-      <label class="homey-form-label" for="meter" data-i18n="settings.volume"></label>
-      <select class="homey-form-select" id="meter"></select>
-    </div>
-    <div class="homey-form-group">
-      <label class="homey-form-label" for="unit" data-i18n="settings.unit"></label>
-      <select class="homey-form-select" id="unit">
-        <option value="m3">m³</option>
-        <option value="L">L</option>
-      </select>
-    </div>
-    <div class="homey-form-group">
-      <label class="homey-form-label" for="grace" data-i18n="settings.grace"></label>
-      <input class="homey-form-input" id="grace" type="number" min="0" max="600" />
-    </div>
-    <button class="homey-button-primary-full" id="save" data-i18n="settings.save"></button>
-  </fieldset>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="overview" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg><span data-i18n="settings.tab_overview"></span></button>
+    <button role="tab" data-tab="programs" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg><span data-i18n="settings.tab_programs"></span></button>
+    <button role="tab" data-tab="water" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7c3.4 4 6 7.3 6 10.8a6 6 0 0 1-12 0c0-3.5 2.6-6.8 6-10.8z"/></svg><span data-i18n="settings.tab_water"></span></button>
+    <button role="tab" data-tab="valve" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14h18M6 14v4M18 14v4M12 14V8M8 6h8"/></svg><span data-i18n="settings.tab_valve"></span></button>
+  </nav>
 
-  <fieldset class="homey-form-fieldset">
-    <legend class="homey-form-legend" data-i18n="settings.valve"></legend>
-    <p class="homey-form-hint" data-i18n="settings.valve_intro"></p>
-    <div class="homey-form-group">
-      <label class="homey-form-label" for="valve" data-i18n="settings.valve_device"></label>
-      <select class="homey-form-select" id="valve"></select>
-    </div>
-    <label class="homey-form-checkbox">
-      <input class="homey-form-checkbox-input" type="checkbox" id="keepOn" />
-      <span class="homey-form-checkbox-checkmark"></span>
-      <span class="homey-form-checkbox-text" data-i18n="settings.valve_keep"></span>
-    </label>
-    <label class="homey-form-checkbox">
-      <input class="homey-form-checkbox-input" type="checkbox" id="offWhenDone" />
-      <span class="homey-form-checkbox-checkmark"></span>
-      <span class="homey-form-checkbox-text" data-i18n="settings.valve_off"></span>
-    </label>
-    <button class="homey-button-primary-full" id="saveValve" data-i18n="settings.save"></button>
-    <button class="homey-button-secondary-full" id="testValve" data-i18n="settings.valve_test"></button>
-  </fieldset>
+  <!-- ===== Overview ===== -->
+  <section data-panel="overview">
+    <div id="ovControllers"></div>
+  </section>
 
-  <fieldset class="homey-form-fieldset">
-    <legend class="homey-form-legend" data-i18n="settings.zones"></legend>
-    <p id="live"></p>
-    <table id="zones"></table>
-    <p id="unassigned"></p>
-    <button class="homey-button-secondary-full" id="reset" data-i18n="settings.reset"></button>
-  </fieldset>
-
-  <fieldset class="homey-form-fieldset">
-    <legend class="homey-form-legend" data-i18n="settings.p_title"></legend>
-    <div class="homey-form-group" id="pCtrlWrap">
-      <label class="homey-form-label" for="pCtrl" data-i18n="settings.p_controller"></label>
-      <select class="homey-form-select" id="pCtrl"></select>
-    </div>
-    <div id="pList"></div>
-    <button class="homey-button-secondary-full" id="pNew" data-i18n="settings.p_new"></button>
-  </fieldset>
-
-  <fieldset class="homey-form-fieldset hidden" id="pEdit">
-    <legend class="homey-form-legend" id="pEditTitle"></legend>
-    <div class="homey-form-group">
-      <label class="homey-form-label" for="pName" data-i18n="settings.p_name"></label>
-      <input class="homey-form-input" id="pName" maxlength="32" />
-    </div>
-    <label class="homey-form-checkbox"><input class="homey-form-checkbox-input" type="checkbox" id="pEnabled" /><span class="homey-form-checkbox-checkmark"></span><span class="homey-form-checkbox-text" data-i18n="settings.p_enabled"></span></label>
-    <label class="homey-form-checkbox"><input class="homey-form-checkbox-input" type="checkbox" id="pWeather" /><span class="homey-form-checkbox-checkmark"></span><span class="homey-form-checkbox-text" data-i18n="settings.p_weather"></span></label>
-    <div class="homey-form-group">
-      <label class="homey-form-label" for="pType" data-i18n="settings.p_schedule"></label>
-      <select class="homey-form-select" id="pType">
-        <option value="weekly" data-i18n="settings.p_weekly"></option>
-        <option value="interval" data-i18n="settings.p_interval"></option>
-      </select>
-      <p class="warn hidden" id="pOther" data-i18n="settings.p_other"></p>
-    </div>
-    <div class="homey-form-group" id="pWeeklyWrap"><div class="days" id="pDays"></div></div>
-    <div class="homey-form-group grid2 hidden" id="pIntervalWrap">
-      <div><label class="homey-form-label" for="pEvery" data-i18n="settings.p_every"></label><input class="homey-form-input" id="pEvery" type="number" min="1" max="128" /></div>
-      <div><label class="homey-form-label" for="pStartIn" data-i18n="settings.p_start_in"></label><input class="homey-form-input" id="pStartIn" type="number" min="0" max="127" /></div>
-    </div>
-    <div class="homey-form-group">
-      <label class="homey-form-label" for="pStartType" data-i18n="settings.p_starts"></label>
-      <select class="homey-form-select" id="pStartType">
-        <option value="fixed" data-i18n="settings.p_fixed"></option>
-        <option value="repeat" data-i18n="settings.p_repeat"></option>
-      </select>
-      <p class="homey-form-hint" data-i18n="settings.p_time_hint"></p>
-    </div>
-    <div class="homey-form-group grid2" id="pFixedWrap">
-      <input class="homey-form-input" id="pS0" placeholder="06:00" /><input class="homey-form-input" id="pS1" />
-      <input class="homey-form-input" id="pS2" /><input class="homey-form-input" id="pS3" />
-    </div>
-    <div class="homey-form-group hidden" id="pRepeatWrap">
-      <input class="homey-form-input" id="pFirst" placeholder="06:00" />
-      <div class="grid2" style="margin-top:8px">
-        <div><label class="homey-form-label" for="pRepeat" data-i18n="settings.p_repeat_n"></label><input class="homey-form-input" id="pRepeat" type="number" min="0" max="100" /></div>
-        <div><label class="homey-form-label" for="pRepeatEvery" data-i18n="settings.p_repeat_every"></label><input class="homey-form-input" id="pRepeatEvery" type="number" min="1" max="1440" /></div>
+  <!-- ===== Programs ===== -->
+  <section data-panel="programs" class="hidden">
+    <div class="card" id="pListCard">
+      <div class="card-h">
+        <div><h2 data-i18n="settings.p_title"></h2><div class="sub" id="pCount"></div></div>
+        <button class="chip blue" id="pNew">+ <span data-i18n="settings.p_new"></span></button>
       </div>
+      <div class="field" id="pCtrlWrap"><label for="pCtrl" data-i18n="settings.p_controller"></label><select class="input" id="pCtrl"></select></div>
+      <div id="pList"></div>
     </div>
-    <div class="homey-form-group">
-      <label class="homey-form-label" data-i18n="settings.p_durations"></label>
-      <div class="dur" id="pDur"></div>
+
+    <div class="card hidden" id="pEdit">
+      <div class="sheet-h">
+        <button class="back" id="pCancel" aria-label="Back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <h2 id="pEditTitle"></h2>
+      </div>
+      <div class="field"><label for="pName" data-i18n="settings.p_name"></label><input class="input" id="pName" maxlength="32" /></div>
+      <div class="row-sw"><span data-i18n="settings.p_enabled"></span><input type="checkbox" class="sw" id="pEnabled" /></div>
+      <div class="row-sw"><span data-i18n="settings.p_weather"></span><input type="checkbox" class="sw" id="pWeather" /></div>
+
+      <div class="field" style="margin-top:12px">
+        <span class="lbl" data-i18n="settings.p_schedule"></span>
+        <select class="hidden" id="pType"><option value="weekly"></option><option value="interval"></option></select>
+        <div class="seg" data-for="pType"><button data-v="weekly" data-i18n="settings.p_weekly"></button><button data-v="interval" data-i18n="settings.p_interval"></button></div>
+        <p class="warn hidden" id="pOther" data-i18n="settings.p_other"></p>
+      </div>
+      <div class="field" id="pWeeklyWrap"><div class="days" id="pDays"></div></div>
+      <div class="field grid2 hidden" id="pIntervalWrap">
+        <div><label for="pEvery" data-i18n="settings.p_every"></label><input class="input" id="pEvery" type="number" min="1" max="128" /></div>
+        <div><label for="pStartIn" data-i18n="settings.p_start_in"></label><input class="input" id="pStartIn" type="number" min="0" max="127" /></div>
+      </div>
+
+      <div class="field">
+        <span class="lbl" data-i18n="settings.p_starts"></span>
+        <select class="hidden" id="pStartType"><option value="fixed"></option><option value="repeat"></option></select>
+        <div class="seg" data-for="pStartType"><button data-v="fixed" data-i18n="settings.p_fixed"></button><button data-v="repeat" data-i18n="settings.p_repeat"></button></div>
+      </div>
+      <div class="field grid4" id="pFixedWrap">
+        <input class="input" id="pS0" placeholder="06:00" /><input class="input" id="pS1" placeholder="–" />
+        <input class="input" id="pS2" placeholder="–" /><input class="input" id="pS3" placeholder="–" />
+      </div>
+      <div class="field hidden" id="pRepeatWrap">
+        <input class="input" id="pFirst" placeholder="06:00" />
+        <div class="grid2" style="margin-top:10px">
+          <div><label for="pRepeat" data-i18n="settings.p_repeat_n"></label><input class="input" id="pRepeat" type="number" min="0" max="100" /></div>
+          <div><label for="pRepeatEvery" data-i18n="settings.p_repeat_every"></label><input class="input" id="pRepeatEvery" type="number" min="1" max="1440" /></div>
+        </div>
+      </div>
+      <p class="hint" style="margin-top:-6px" data-i18n="settings.p_time_hint"></p>
+
+      <div class="field" style="margin-top:16px"><span class="lbl" data-i18n="settings.p_durations"></span><div class="dur" id="pDur"></div></div>
+
+      <button class="btn primary" id="pSave" data-i18n="settings.save"></button>
+      <button class="btn danger" id="pDelete" data-i18n="settings.p_delete"></button>
     </div>
-    <button class="homey-button-primary-full" id="pSave" data-i18n="settings.save"></button>
-    <button class="homey-button-secondary-full" id="pCancel" data-i18n="settings.p_cancel"></button>
-    <button class="homey-button-danger-full" id="pDelete" data-i18n="settings.p_delete"></button>
-  </fieldset>
+  </section>
+
+  <!-- ===== Water ===== -->
+  <section data-panel="water" class="hidden">
+    <div class="card">
+      <div class="card-h"><div><h2 data-i18n="settings.zones"></h2><div class="sub" id="live"></div></div></div>
+      <div class="live" id="liveFlow"></div>
+      <table class="zt" id="zones"></table>
+      <p id="unassigned"></p>
+      <button class="btn ghost" id="reset" data-i18n="settings.reset"></button>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2 data-i18n="settings.meter"></h2></div>
+      <p class="intro" data-i18n="settings.intro"></p>
+      <div class="field"><label for="device" data-i18n="settings.device"></label><select class="input" id="device"></select></div>
+      <div class="field"><label for="flow" data-i18n="settings.flow"></label><select class="input" id="flow"></select></div>
+      <div class="field"><label for="meter" data-i18n="settings.volume"></label><select class="input" id="meter"></select></div>
+      <div class="grid2">
+        <div class="field"><label for="unit" data-i18n="settings.unit"></label><select class="input" id="unit"><option value="m3">m³</option><option value="L">L</option></select></div>
+        <div class="field"><label for="grace" data-i18n="settings.grace_short"></label><input class="input" id="grace" type="number" min="0" max="600" /></div>
+      </div>
+      <p class="hint" style="margin-top:-6px" data-i18n="settings.grace"></p>
+      <button class="btn primary" id="save" data-i18n="settings.save"></button>
+    </div>
+  </section>
+
+  <!-- ===== Valve ===== -->
+  <section data-panel="valve" class="hidden">
+    <div class="card">
+      <div class="card-h"><h2 data-i18n="settings.valve"></h2></div>
+      <p class="intro" data-i18n="settings.valve_intro"></p>
+      <div class="field"><label for="valve" data-i18n="settings.valve_device"></label><select class="input" id="valve"></select></div>
+      <div class="row-sw"><span data-i18n="settings.valve_keep"></span><input type="checkbox" class="sw" id="keepOn" /></div>
+      <div class="row-sw"><span data-i18n="settings.valve_off"></span><input type="checkbox" class="sw" id="offWhenDone" /></div>
+      <button class="btn primary" id="saveValve" data-i18n="settings.save"></button>
+      <button class="btn ghost" id="testValve" data-i18n="settings.valve_test"></button>
+    </div>
+  </section>
+
+  <div class="toast" id="toast"></div>
 
   <script type="text/javascript">
   function onHomeyReady(Homey) {
@@ -149,6 +246,62 @@
     let meters = [];
 
     const opt = (sel, value, text) => { const o = document.createElement('option'); o.value = value; o.textContent = text; sel.appendChild(o); };
+    const esc = v => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const num = (v, d = 0) => Number(v || 0).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
+    const litres = l => (l >= 1000 ? `${num(l / 1000, 2)} m³` : `${num(l)} L`);
+
+    let toastTimer;
+    function toast(msg) {
+      const el = $('toast'); el.textContent = msg; el.classList.add('show');
+      clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+    }
+
+    // Tabs
+    function showTab(name) {
+      document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
+      document.querySelectorAll('[data-panel]').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== name));
+      try { localStorage.setItem('os-settings-tab', name); } catch (e) { /* storage blocked */ }
+      if (name === 'overview') loadOverview();
+      window.scrollTo(0, 0);
+    }
+    document.querySelectorAll('.tabs button').forEach(b => { b.onclick = () => showTab(b.dataset.tab); });
+
+    // Segmented controls mirror a hidden <select>
+    function syncSeg() {
+      document.querySelectorAll('.seg[data-for]').forEach(seg => {
+        const v = $(seg.dataset.for).value;
+        seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+      });
+    }
+    document.querySelectorAll('.seg[data-for]').forEach(seg => seg.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      $(seg.dataset.for).value = b.dataset.v; toggleEditor();
+    }));
+
+    // Overview
+    async function loadOverview() {
+      const box = $('ovControllers');
+      let data;
+      try { data = await Homey.api('GET', '/overview'); } catch (err) { box.innerHTML = `<div class="card empty">${esc(err.message || err)}</div>`; return; }
+      if (!data.controllers.length) { box.innerHTML = `<div class="card empty">${esc(t('p_no_controller'))}</div>`; return; }
+      box.innerHTML = data.controllers.map(c => {
+        const dot = !c.online ? 'var(--red)' : c.enabled ? 'var(--green)' : 'var(--muted)';
+        const status = !c.online ? t('ov_offline') : c.enabled ? t('ov_online') : t('ov_disabled');
+        const running = c.running.length ? c.running.map(esc).join(', ') : t('ov_none');
+        return `<div class="card">
+          <div class="card-h"><div><h2>${esc(c.name)}</h2><div class="status"><span class="dot" style="background:${dot}"></span>${status}${c.host ? ` · ${esc(c.host)}` : ''}</div></div>
+          ${c.rainDelay ? `<span class="badge">${esc(t('ov_rain_delay'))}</span>` : ''}</div>
+          <div class="stats">
+            <div class="stat ${c.running.length ? 'on' : ''}"><div class="k">${t('ov_running')}</div><div class="v" style="font-size:17px">${running}</div></div>
+            <div class="stat"><div class="k">${t('ov_zones')}</div><div class="v">${c.zones}</div></div>
+            <div class="stat"><div class="k">${t('ov_programs')}</div><div class="v">${c.programsActive}<small>/ ${c.programs}</small></div></div>
+            <div class="stat"><div class="k">${t('ov_level')}</div><div class="v">${c.waterLevel}<small>%</small></div></div>
+          </div></div>`;
+      }).join('') + `<div class="card"><div class="card-h"><h2>${t('ov_extras')}</h2></div>
+        <div class="row-sw"><span>${t('tab_water')}</span><span class="status">${data.water ? `${esc(data.water.name)} · ${num(data.water.flow, 1)} L/min` : t('ov_not_set')}</span></div>
+        <div class="row-sw"><span>${t('valve')}</span><span class="status">${data.valve ? esc(data.valve) : t('ov_not_set')}</span></div></div>`;
+    }
+
 
     function fillCaps(cfg) {
       const dev = meters.find(m => m.id === $('device').value);
@@ -166,16 +319,17 @@
     async function loadStatus() {
       try {
         const s = await Homey.api('GET', '/status');
-        $('live').textContent = s.meterName ? `${s.meterName}: ${s.flow} L/min` : t('not_configured');
+        $('live').textContent = s.meterName || t('not_configured');
+        $('liveFlow').innerHTML = s.meterName ? `${num(s.flow, 1)}<small>L/min</small>` : '';
         const tbl = $('zones'); tbl.innerHTML = `<tr><th>${t('zone')}</th><th class="n">L/min</th><th class="n">${t('last_run')}</th><th class="n">${t('total')}</th></tr>`;
         s.zones.forEach(z => {
           const tr = document.createElement('tr');
-          [z.name, (z.flow || 0).toFixed(1), `${Math.round(z.lastRun)} L`, `${Math.round(z.total)} L`].forEach((v, i) => {
+          [z.name, num(z.flow, 1), litres(z.lastRun), litres(z.total)].forEach((v, i) => {
             const td = document.createElement('td'); td.textContent = v; if (i) td.className = 'n'; if (!i && z.running) td.className = 'run'; tr.appendChild(td);
           });
           tbl.appendChild(tr);
         });
-        $('unassigned').textContent = `${t('unassigned')}: ${Math.round(s.unassigned)} L`;
+        $('unassigned').textContent = `${t('unassigned')}: ${litres(s.unassigned)}`;
         return s;
       } catch (err) { $('live').textContent = err.message || err; return null; }
     }
@@ -212,7 +366,7 @@
         graceSeconds: Number($('grace').value) || 0,
       }, err => {
         if (err) return Homey.alert(err.message || err);
-        Homey.alert(t('saved'));
+        toast(t('saved'));
         setTimeout(loadStatus, 1500);
       });
     };
@@ -221,10 +375,10 @@
         deviceId: $('valve').value || null,
         keepOn: $('keepOn').checked,
         offWhenDone: $('offWhenDone').checked,
-      }, err => (err ? Homey.alert(err.message || err) : Homey.alert(t('saved'))));
+      }, err => (err ? Homey.alert(err.message || err) : toast(t('saved'))));
     };
     $('testValve').onclick = async () => {
-      try { await Homey.api('POST', '/valve/test'); Homey.alert(t('valve_tested')); } catch (err) { Homey.alert(err.message || err); }
+      try { await Homey.api('POST', '/valve/test'); toast(t('valve_tested')); } catch (err) { Homey.alert(err.message || err); }
     };
     $('reset').onclick = () => Homey.confirm(t('reset_confirm'), 'warning', async (err, ok) => {
       if (!ok) return;
@@ -266,19 +420,20 @@
 
     function renderPrograms() {
       const list = $('pList'); list.innerHTML = '';
-      if (!P.data.programs.length) { list.textContent = t('p_none'); return; }
+      const active = P.data.programs.filter(p => p.enabled).length;
+      $('pCount').textContent = P.data.programs.length ? t('p_count').replace('{a}', active).replace('{n}', P.data.programs.length) : '';
+      if (!P.data.programs.length) { list.innerHTML = `<div class="empty">${esc(t('p_none'))}</div>`; return; }
       P.data.programs.forEach(p => {
-        const row = document.createElement('div'); row.className = 'prog-row';
-        row.innerHTML = '<input type="checkbox" /><div class="info"><div class="pn"></div><div class="ps"></div></div><button class="homey-button-secondary-small run"></button><button class="homey-button-primary-small edit"></button>';
-        const cb = row.querySelector('input'); cb.checked = p.enabled; cb.title = t('p_enabled');
+        const row = document.createElement('div'); row.className = `prog-row${p.enabled ? '' : ' off'}`;
+        row.innerHTML = '<div class="info edit"><div class="pn"></div><div class="ps"></div></div><button class="chip run"></button><input type="checkbox" class="sw" />';
+        const cb = row.querySelector('input'); cb.checked = p.enabled; cb.setAttribute('aria-label', t('p_enabled'));
         row.querySelector('.pn').textContent = p.name;
         row.querySelector('.ps').textContent = summary(p);
-        row.querySelector('.run').textContent = t('p_run');
-        row.querySelector('.edit').textContent = t('p_edit');
+        row.querySelector('.run').textContent = `▶ ${t('p_run')}`;
         cb.onchange = () => saveProgram({ ...p, enabled: cb.checked, startInDays: startIn(p) });
         row.querySelector('.run').onclick = () => Homey.confirm(`${t('p_run')} «${p.name}»?`, null, async (e, ok) => {
           if (!ok) return;
-          try { P.data = await Homey.api('POST', '/programs/run', { controller: P.ctrl, pid: p.pid }); Homey.alert(t('p_started')); } catch (err) { Homey.alert(err.message || err); }
+          try { P.data = await Homey.api('POST', '/programs/run', { controller: P.ctrl, pid: p.pid }); toast(t('p_started')); } catch (err) { Homey.alert(err.message || err); }
         });
         row.querySelector('.edit').onclick = () => openEditor(p);
         list.appendChild(row);
@@ -306,7 +461,7 @@
       $('pDays').innerHTML = '';
       dayNames().forEach((n, d) => {
         const l = document.createElement('label');
-        l.innerHTML = `<input type="checkbox" data-day="${d}" ${p.weekdays.includes(d) ? 'checked' : ''}/> ${n}`;
+        l.innerHTML = `<input type="checkbox" data-day="${d}" ${p.weekdays.includes(d) ? 'checked' : ''}/><span>${esc(n)}</span>`;
         $('pDays').appendChild(l);
       });
       $('pEvery').value = p.interval || 2;
@@ -318,15 +473,16 @@
       $('pRepeatEvery').value = p.repeatInterval || 60;
       $('pDur').innerHTML = '';
       zonesFor().forEach(z => {
+        const r = document.createElement('div'); r.className = 'dur-row';
         const name = document.createElement('span'); name.textContent = z.name + (z.disabled ? ` (${t('p_disabled')})` : '');
-        const inp = document.createElement('input'); inp.className = 'homey-form-input'; inp.type = 'number'; inp.min = 0; inp.max = 720; inp.step = 'any';
+        const inp = document.createElement('input'); inp.className = 'input'; inp.type = 'number'; inp.min = 0; inp.max = 720; inp.step = 'any'; inp.inputMode = 'decimal';
         inp.dataset.sid = z.sid; inp.placeholder = 'min';
         const sec = p.durations[z.sid] || 0; inp.value = sec ? Math.round((sec / 60) * 10) / 10 : '';
-        $('pDur').appendChild(name); $('pDur').appendChild(inp);
+        r.appendChild(name); r.appendChild(inp); $('pDur').appendChild(r);
       });
       $('pDelete').classList.toggle('hidden', isNew);
-      toggleEditor(); $('pEdit').classList.remove('hidden');
-      $('pEdit').scrollIntoView({ behavior: 'smooth' });
+      toggleEditor(); $('pEdit').classList.remove('hidden'); $('pListCard').classList.add('hidden');
+      window.scrollTo(0, 0);
     }
 
     function toggleEditor() {
@@ -334,7 +490,9 @@
       $('pIntervalWrap').classList.toggle('hidden', $('pType').value !== 'interval');
       $('pFixedWrap').classList.toggle('hidden', $('pStartType').value !== 'fixed');
       $('pRepeatWrap').classList.toggle('hidden', $('pStartType').value !== 'repeat');
+      syncSeg();
     }
+    function closeEditor() { $('pEdit').classList.add('hidden'); $('pListCard').classList.remove('hidden'); }
     $('pType').onchange = toggleEditor; $('pStartType').onchange = toggleEditor;
 
     function readEditor() {
@@ -376,14 +534,14 @@
     $('pSave').onclick = async () => {
       let program;
       try { program = readEditor(); } catch (err) { return Homey.alert(err.message); }
-      if (await saveProgram(program)) { $('pEdit').classList.add('hidden'); Homey.alert(t('saved')); }
+      if (await saveProgram(program)) { closeEditor(); toast(t('saved')); }
     };
-    $('pCancel').onclick = () => $('pEdit').classList.add('hidden');
+    $('pCancel').onclick = closeEditor;
     $('pDelete').onclick = () => Homey.confirm(`${t('p_delete')} «${P.editing.name}»?`, 'warning', async (e, ok) => {
       if (!ok) return;
       try {
         P.data = await Homey.api('POST', '/programs/delete', { controller: P.ctrl, pid: P.editing.pid });
-        $('pEdit').classList.add('hidden'); renderPrograms();
+        closeEditor(); renderPrograms();
       } catch (err) { Homey.alert(err.message || err); }
     });
     $('pNew').onclick = () => openEditor(null);
@@ -404,13 +562,16 @@
         $('pNew').classList.toggle('hidden', !ctrls.length);
         if (!ctrls.length) { $('pList').textContent = t('p_no_controller'); return; }
         P.ctrl = ctrls[0].id;
-        $('pCtrl').onchange = () => { P.ctrl = $('pCtrl').value; $('pEdit').classList.add('hidden'); loadPrograms(); };
+        $('pCtrl').onchange = () => { P.ctrl = $('pCtrl').value; closeEditor(); loadPrograms(); };
         loadPrograms();
       } catch (err) { $('pList').textContent = err.message || String(err); }
     })();
 
     init();
     setInterval(loadStatus, 5000);
+    let startTab = 'overview';
+    try { startTab = localStorage.getItem('os-settings-tab') || 'overview'; } catch (e) { /* storage blocked */ }
+    showTab(document.querySelector(`[data-tab="${startTab}"]`) ? startTab : 'overview');
   }
   </script>
 </body>

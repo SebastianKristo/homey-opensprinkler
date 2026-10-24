@@ -1,6 +1,6 @@
 {
   "name": "no.kristo.opensprinkler",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "main": "app.js",
   "license": "MIT",
   "engines": {

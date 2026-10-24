@@ -20,6 +20,31 @@ async function programState(ctrl) {
 }
 
 module.exports = {
+  async getOverview({ homey }) {
+    const water = homey.app.water.status();
+    const valve = homey.app.valve.status();
+    return {
+      controllers: homey.app.getControllers().map(c => {
+        const s = c.state;
+        const zones = s ? s.zones.filter(z => !z.isMaster && !z.disabled) : [];
+        return {
+          id: c.getData().id,
+          name: c.getName(),
+          host: c.getSetting('host'),
+          online: c.getAvailable() && !!s,
+          enabled: !!(s && s.enabled),
+          rainDelay: !!(s && s.rainDelay),
+          waterLevel: s ? s.waterLevel : 0,
+          zones: zones.length,
+          running: zones.filter(z => z.running).map(z => z.name),
+          programs: s ? s.programs.length : 0,
+          programsActive: s ? s.programs.filter(p => p.enabled).length : 0,
+        };
+      }),
+      water: water.meterName ? { name: water.meterName, flow: water.flow } : null,
+      valve: valve.name,
+    };
+  },
   async getControllers({ homey }) {
     return homey.app.getControllers().map(c => ({ id: c.getData().id, name: c.getName() }));
   },
