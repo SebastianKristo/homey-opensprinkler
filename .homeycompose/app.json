@@ -1,6 +1,6 @@
 {
   "id": "no.kristo.opensprinkler",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "compatibility": ">=12.3.0",
   "sdk": 3,
   "platforms": [
